@@ -1,0 +1,24 @@
+{
+  "name": "com.oojjrs.onet",
+  "displayName": "OOJJRS' Unity Netcode Helper",
+  "version": "1.1.0",
+  "unity": "6000.0",
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oojjrs/unity_onet.git?path=/Assets"
+  },
+  "author": {
+    "name": "oojjrs",
+    "email": "oojjrs@gmail.com"
+  },
+  "dependencies": {
+	"com.unity.services.authentication": "3.5.2",
+	"com.unity.services.deployment": "1.6.2",
+    "com.unity.multiplayer.center": "1.0.1",
+	"com.unity.services.multiplayer": "2.0.0",
+	"com.unity.multiplayer.tools": "2.2.8",
+	"com.unity.netcode.gameobjects": "2.11.0",
+	"com.unity.transport": "2.6.0"
+  }
+}
