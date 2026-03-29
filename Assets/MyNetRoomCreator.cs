@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
@@ -18,17 +17,17 @@ namespace oojjrs.onet
         {
             try
             {
-                var lobby = await LobbyService.Instance.CreateLobbyAsync(Config.Title, Config.MaxPlayers, new()
+                var room = await LobbyService.Instance.CreateLobbyAsync(Config.Title, Config.MaxPlayers, new()
                 {
-                    Data = Config.LobbyFields.ToDictionary(t => t.key, t => ToLobbyDataObject(t)),
+                    Data = MyNet.ToRoomData(Config.RoomFields),
                     IsPrivate = Config.IsPrivate,
                     Player = new(id: Config.Account, data: MyNet.ToPlayerData(Config.PlayerFields)),
                 });
 
                 if (this != default)
                 {
-                    if (lobby != default)
-                        OnOk?.Invoke(lobby);
+                    if (room != default)
+                        OnOk?.Invoke(room);
                     else
                         OnFailed?.Invoke();
                 }
@@ -40,28 +39,6 @@ namespace oojjrs.onet
 
             if (this != default)
                 MyNet.Room.StopCreate();
-
-            DataObject ToLobbyDataObject(MyNet.Field field)
-            {
-                return new DataObject(Convert(field.visibility), field.value);
-
-                DataObject.VisibilityOptions Convert(MyNet.Field.VisibilityEnum e)
-                {
-                    return e switch
-                    {
-                        MyNet.Field.VisibilityEnum.Public => DataObject.VisibilityOptions.Public,
-                        MyNet.Field.VisibilityEnum.Member => DataObject.VisibilityOptions.Member,
-                        MyNet.Field.VisibilityEnum.Private => DataObject.VisibilityOptions.Private,
-                        _ => HandleException(e),
-                    };
-
-                    DataObject.VisibilityOptions HandleException(MyNet.Field.VisibilityEnum e)
-                    {
-                        Debug.LogWarning($"{name}> UNEXPECTED VALUE: {e}. FALLING BACK TO PUBLIC.");
-                        return DataObject.VisibilityOptions.Public;
-                    }
-                }
-            }
         }
     }
 }

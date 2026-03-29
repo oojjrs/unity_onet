@@ -15,10 +15,10 @@ namespace oojjrs.onet
         {
             try
             {
-                await LobbyService.Instance.RemovePlayerAsync(Config.LobbyId, Config.PlayerId);
+                await LobbyService.Instance.RemovePlayerAsync(Config.RoomId, Config.PlayerId);
 
                 if (this != default)
-                    OnOk?.Invoke(Config.LobbyId, Config.PlayerId);
+                    OnOk?.Invoke(Config.RoomId, Config.PlayerId);
             }
             catch (LobbyServiceException e)
             {

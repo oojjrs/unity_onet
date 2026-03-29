@@ -5,9 +5,9 @@ using UnityEngine;
 
 namespace oojjrs.onet
 {
-    public class MyNetRoomJoiner : MonoBehaviour
+    public class MyNetRoomUpdater : MonoBehaviour
     {
-        public MyNet.Room.JoinConfigInterface Config { get; set; }
+        public MyNet.Room.UpdateConfigInterface Config { get; set; }
 
         public event Action<LobbyServiceException> OnException;
         public event Action OnFailed;
@@ -17,9 +17,10 @@ namespace oojjrs.onet
         {
             try
             {
-                var room = await LobbyService.Instance.JoinLobbyByIdAsync(Config.RoomId, new()
+                var room = await LobbyService.Instance.UpdateLobbyAsync(Config.RoomId, new()
                 {
-                    Player = new(id: Config.Account, data: MyNet.ToPlayerData(Config.PlayerFields)),
+                    Data = MyNet.ToRoomData(Config.RoomFields),
+                    IsPrivate = Config.IsPrivate,
                 });
                 if (this != default)
                 {
@@ -35,7 +36,7 @@ namespace oojjrs.onet
             }
 
             if (this != default)
-                MyNet.Room.StopJoin();
+                MyNet.Room.StopUpdate();
         }
     }
 }

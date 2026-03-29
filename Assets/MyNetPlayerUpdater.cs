@@ -23,7 +23,6 @@ namespace oojjrs.onet
                 });
                 if (this != default)
                 {
-                    // 유니티는 무조건 적용/동기화되었다고 간주하는 모양임.
                     if (lobby != default)
                         OnOk?.Invoke(lobby);
                     else

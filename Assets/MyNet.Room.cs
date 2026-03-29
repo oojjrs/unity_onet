@@ -12,28 +12,36 @@ namespace oojjrs.onet
             public interface CreateConfigInterface
             {
                 string Account { get; }
-                IEnumerable<Field> LobbyFields { get; }
                 bool IsPrivate { get; }
                 int MaxPlayers { get; }
                 IEnumerable<Field> PlayerFields { get; }
+                IEnumerable<Field> RoomFields { get; }
                 string Title { get; }
             }
 
             public interface ExitConfigInterface
             {
-                string LobbyId { get; }
                 string PlayerId { get; }
+                string RoomId { get; }
             }
 
             public interface JoinConfigInterface
             {
                 string Account { get; }
-                string LobbyId { get; }
+                string RoomId { get; }
                 IEnumerable<Field> PlayerFields { get; }
+            }
+
+            public interface UpdateConfigInterface
+            {
+                bool IsPrivate { get; }
+                IEnumerable<Field> RoomFields { get; }
+                string RoomId { get; }
             }
 
             private static GameObject _creator;
             private static GameObject _joiner;
+            private static GameObject _updater;
 
             public static void StartCreate(CreateConfigInterface config, Action<Unity.Services.Lobbies.Models.Lobby> onOk = default, Action onFailed = default, Action<LobbyServiceException> onException = default)
             {
@@ -76,6 +84,21 @@ namespace oojjrs.onet
                 _joiner = go;
             }
 
+            public static void StartUpdate(UpdateConfigInterface config, Action<Unity.Services.Lobbies.Models.Lobby> onOk = default, Action onFailed = default, Action<LobbyServiceException> onException = default)
+            {
+                StopUpdate();
+
+                var go = new GameObject(nameof(MyNetRoomUpdater), typeof(MyNetRoomUpdater));
+                var c = go.GetComponent<MyNetRoomUpdater>();
+                c.Config = config;
+
+                c.OnException += onException;
+                c.OnFailed += onFailed;
+                c.OnOk += onOk;
+
+                _updater = go;
+            }
+
             public static void StopCreate()
             {
                 if (_creator != default)
@@ -93,6 +116,16 @@ namespace oojjrs.onet
                     UnityEngine.Object.Destroy(_joiner);
 
                     _joiner = default;
+                }
+            }
+
+            public static void StopUpdate()
+            {
+                if (_updater != default)
+                {
+                    UnityEngine.Object.Destroy(_updater);
+
+                    _updater = default;
                 }
             }
         }
