@@ -27,7 +27,7 @@ namespace oojjrs.onet
                 {
                     Debug.LogWarning(e);
 
-                    MyNet.Lobby.ThrowException(e);
+                    MyNet.Lobby.RaiseException(e);
                 }
             }
         }

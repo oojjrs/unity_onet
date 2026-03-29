@@ -1,20 +1,21 @@
 # Lobby
 
-로비 목록을 주기적으로 조회하고, 결과를 콜백으로 전달하는 기능을 제공합니다.
+로비 조회 및 생성 기능을 제공합니다.
 
 ---
 
 ## 개요
 
-* 자동 로비 조회 (Polling)
-* 수동 업데이트 트리거 지원
-* 콜백 기반 결과 전달
-* 예외 전달
-* Time.timeScale의 영향을 받지 않음
+- 로비 목록 자동 조회 (Polling)
+- 수동 업데이트 요청
+- 로비 생성 기능
+- 콜백 기반 결과 전달
+- 예외 전달
+- Time.timeScale의 영향을 받지 않음
 
 ---
 
-## 사용 방법
+## 로비 조회
 
 ### 시작
 
@@ -32,10 +33,10 @@ MyNet.Lobby.StartUpdate(
 
 ---
 
-### 수동 업데이트
+### 수동 업데이트 요청
 
 ```csharp
-MyNet.Lobby.TryUpdate();
+MyNet.Lobby.RequestUpdate();
 ```
 
 ---
@@ -56,10 +57,72 @@ MyNet.Lobby.StopUpdate();
 
 ---
 
+## 로비 생성
+
+### ConfigInterface 구현
+
+```csharp
+class MyLobbyConfig : MyNet.Lobby.ConfigInterface
+{
+    public string Title => "My Lobby";
+    public int MaxPlayers => 4;
+    public bool IsPrivate => false;
+    public string Account => "player_001";
+
+    public IEnumerable<Field> LobbyFields => new[]
+    {
+        new Field { key = "mode", value = "rank", visibility = Field.VisibilityEnum.Public }
+    };
+
+    public IEnumerable<Field> PlayerFields => new[]
+    {
+        new Field { key = "rank", value = "gold", visibility = Field.VisibilityEnum.Member }
+    };
+}
+```
+
+---
+
+### 생성
+
+```csharp
+MyNet.Lobby.StartCreate(
+    new MyLobbyConfig(),
+    lobby =>
+    {
+        Debug.Log($"Created Lobby: {lobby.Id}");
+    },
+    () =>
+    {
+        Debug.LogError("Create Failed");
+    },
+    exception =>
+    {
+        Debug.LogError(exception);
+    });
+```
+
+---
+
+### 중지
+
+```csharp
+MyNet.Lobby.StopCreate();
+```
+
+---
+
 ## 콜백
 
 ```csharp
+// Update
 Action<List<Lobby>> onUpdate
+
+// Create
+Action<Lobby> onCreate
+Action onCreateFailed
+
+// 공통
 Action<LobbyServiceException> onException
 ```
 
@@ -67,15 +130,23 @@ Action<LobbyServiceException> onException
 
 ## 동작 방식
 
-* `Time.realtimeSinceStartup` 기반으로 동작
-* 내부 `MonoBehaviour`를 통해 업데이트 루프 실행
-* 재시작 시 updater 자동 재생성
-* async 처리 중 객체 파괴에 대한 안전 처리 포함
+- `Time.realtimeSinceStartup` 기반
+- 내부 `MonoBehaviour`를 통해 실행
+- updater / creator GameObject 자동 생성 및 제거
+- async 처리 중 객체 파괴 안전 처리 포함
+
+---
+
+## 내부 구조
+
+- Update → `MyNetLobbyUpdater` :contentReference[oaicite:0]{index=0}  
+- Create → `MyNetLobbyCreator` :contentReference[oaicite:1]{index=1}  
+- API Entry → `MyNet.Lobby` :contentReference[oaicite:2]{index=2}  
 
 ---
 
 ## 주의 사항
 
-* Updater GameObject는 내부에서 관리되며 직접 생성할 필요 없음
-* `MyNetLobbyUpdater`를 수동으로 추가하지 말 것
-* 사용 전에 Unity Services 초기화 필요
+- 내부 GameObject는 자동 관리됨
+- 직접 `Updater` / `Creator`를 붙이지 말 것
+- Unity Services 초기화 후 사용 필요
