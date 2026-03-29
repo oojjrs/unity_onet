@@ -17,7 +17,7 @@ namespace oojjrs.onet
         {
             try
             {
-                var lobby = await LobbyService.Instance.UpdatePlayerAsync(Config.LobbyId, Config.PlayerId, new()
+                var lobby = await LobbyService.Instance.UpdatePlayerAsync(Config.RoomId, Config.PlayerId, new()
                 {
                     Data = MyNet.ToPlayerData(Config.PlayerFields),
                 });

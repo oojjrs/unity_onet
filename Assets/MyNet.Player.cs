@@ -11,9 +11,9 @@ namespace oojjrs.onet
         {
             public interface UpdateConfigInterface
             {
-                string LobbyId { get; }
                 IEnumerable<Field> PlayerFields { get; }
                 string PlayerId { get; }
+                string RoomId { get; }
             }
 
             public static void StartUpdate(UpdateConfigInterface config, Action<Unity.Services.Lobbies.Models.Lobby> onOk = default, Action onFailed = default, Action<LobbyServiceException> onException = default)
