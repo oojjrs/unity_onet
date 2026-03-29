@@ -1,6 +1,6 @@
 # Lobby
 
-로비 조회, 생성, 참가 기능을 제공합니다.
+로비 조회, 생성, 참가, 퇴장 기능을 제공합니다.
 
 ---
 
@@ -10,6 +10,7 @@
 - 수동 업데이트 요청
 - 로비 생성
 - 로비 참가
+- 로비 퇴장 / 플레이어 제거
 - 콜백 기반 결과 전달
 - Time.timeScale의 영향을 받지 않음
 
@@ -64,12 +65,22 @@ class MyLobbyConfig : MyNet.Lobby.CreateConfigInterface
 
     public IEnumerable<MyNet.Lobby.Field> LobbyFields => new[]
     {
-        new MyNet.Lobby.Field { key = "mode", value = "rank", visibility = MyNet.Lobby.Field.VisibilityEnum.Public }
+        new MyNet.Lobby.Field
+        {
+            key = "mode",
+            value = "rank",
+            visibility = MyNet.Lobby.Field.VisibilityEnum.Public
+        }
     };
 
     public IEnumerable<MyNet.Lobby.Field> PlayerFields => new[]
     {
-        new MyNet.Lobby.Field { key = "rank", value = "gold", visibility = MyNet.Lobby.Field.VisibilityEnum.Member }
+        new MyNet.Lobby.Field
+        {
+            key = "rank",
+            value = "gold",
+            visibility = MyNet.Lobby.Field.VisibilityEnum.Member
+        }
     };
 }
 ```
@@ -117,7 +128,12 @@ class MyJoinConfig : MyNet.Lobby.JoinConfigInterface
 
     public IEnumerable<MyNet.Lobby.Field> PlayerFields => new[]
     {
-        new MyNet.Lobby.Field { key = "rank", value = "gold", visibility = MyNet.Lobby.Field.VisibilityEnum.Member }
+        new MyNet.Lobby.Field
+        {
+            key = "rank",
+            value = "gold",
+            visibility = MyNet.Lobby.Field.VisibilityEnum.Member
+        }
     };
 }
 ```
@@ -153,6 +169,37 @@ MyNet.Lobby.StopJoin();
 
 ---
 
+## 로비 퇴장
+
+### ExitConfigInterface 구현
+
+```csharp
+class MyExitConfig : MyNet.Lobby.ExitConfigInterface
+{
+    public string LobbyId => "LOBBY_ID";
+    public string PlayerId => "player_001";
+}
+```
+
+---
+
+### 퇴장 요청
+
+```csharp
+MyNet.Lobby.StartExit(
+    new MyExitConfig(),
+    (lobbyId, playerId) =>
+    {
+        Debug.Log($"Exited Lobby: {lobbyId}, Player: {playerId}");
+    },
+    exception =>
+    {
+        Debug.LogError(exception);
+    });
+```
+
+---
+
 ## 콜백
 
 ```csharp
@@ -162,6 +209,9 @@ Action<List<Lobby>> onUpdate
 // Create / Join
 Action<Lobby> onOk
 Action onFailed
+
+// Exit
+Action<string, string> onOk
 
 // 공통
 Action<LobbyServiceException> onException
@@ -175,15 +225,17 @@ Action<LobbyServiceException> onException
 - 기능별 MonoBehaviour 실행
 - GameObject 자동 생성 및 제거
 - async 안전 처리 포함
+- Exit는 1회 실행 후 자기 자신을 파괴하는 단발성 구조
 
 ---
 
 ## 내부 구조
 
-- Update → `MyNetLobbyUpdater` :contentReference[oaicite:0]{index=0}  
-- Create → `MyNetLobbyCreator` :contentReference[oaicite:1]{index=1}  
-- Join → `MyNetLobbyJoiner` :contentReference[oaicite:2]{index=2}  
-- API Entry → `MyNet.Lobby` :contentReference[oaicite:3]{index=3}  
+- Update → `MyNetLobbyUpdater`
+- Create → `MyNetLobbyCreator`
+- Join → `MyNetLobbyJoiner`
+- Exit → `MyNetLobbyExiter`
+- API Entry → `MyNet.Lobby`
 
 ---
 
@@ -192,3 +244,5 @@ Action<LobbyServiceException> onException
 - 내부 GameObject는 자동 관리됨
 - 직접 컴포넌트를 추가하지 말 것
 - Unity Services 초기화 후 사용 필요
+- Exit는 `StopExit()` 없이 요청 단위로 동작함
+- Exit는 일반 퇴장뿐 아니라 특정 플레이어 제거 용도로도 사용할 수 있음

@@ -35,6 +35,12 @@ namespace oojjrs.onet
                 string Title { get; }
             }
 
+            public interface ExitConfigInterface
+            {
+                string LobbyId { get; }
+                string PlayerId { get; }
+            }
+
             public interface JoinConfigInterface
             {
                 string Account { get; }
@@ -67,6 +73,16 @@ namespace oojjrs.onet
                 c.OnException += onException;
 
                 _creator = go;
+            }
+
+            // 이 로직은 추방에도 사용되므로 여러 번 들어올 수 있다.
+            public static void StartExit(ExitConfigInterface config, Action<string, string> onOk = default, Action<LobbyServiceException> onException = default)
+            {
+                var go = new GameObject(nameof(MyNetLobbyExiter), typeof(MyNetLobbyExiter));
+                var c = go.GetComponent<MyNetLobbyExiter>();
+                c.Config = config;
+                c.OnException += onException;
+                c.OnOk += onOk;
             }
 
             public static void StartJoin(JoinConfigInterface config, Action<Unity.Services.Lobbies.Models.Lobby> onOk = default, Action onFailed = default, Action<LobbyServiceException> onException = default)

@@ -27,6 +27,7 @@ MyNet.Lobby.StartUpdate(
 - 로비 조회 (Polling) → [Docs/Lobby.md](Docs/Lobby.md)
 - 로비 생성 (Create)
 - 로비 참가 (Join)
+- 로비 퇴장 / 플레이어 제거 (Exit)
 
 ---
 
@@ -57,5 +58,5 @@ MyNet.Lobby.StartUpdate(
 
 - 내부 이벤트 기반 + 외부 콜백 인터페이스
 - MonoBehaviour 단위 실행 모델
-- 기능별 GameObject 분리 (Updater / Creator / Joiner)
+- 기능별 GameObject 분리 (Updater / Creator / Joiner / Exiter)
 - 최소한의 런타임 오버헤드
