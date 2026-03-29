@@ -4,9 +4,9 @@ using UnityEngine;
 
 namespace oojjrs.onet
 {
-    public class MyNetLobbyExiter : MonoBehaviour
+    public class MyNetRoomExiter : MonoBehaviour
     {
-        public MyNet.Lobby.ExitConfigInterface Config { get; set; }
+        public MyNet.Room.ExitConfigInterface Config { get; set; }
 
         public event Action<LobbyServiceException> OnException;
         public event Action<string, string> OnOk;

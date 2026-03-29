@@ -5,9 +5,9 @@ using UnityEngine;
 
 namespace oojjrs.onet
 {
-    public class MyNetLobbyJoiner : MonoBehaviour
+    public class MyNetRoomJoiner : MonoBehaviour
     {
-        public MyNet.Lobby.JoinConfigInterface Config { get; set; }
+        public MyNet.Room.JoinConfigInterface Config { get; set; }
 
         public event Action<LobbyServiceException> OnException;
         public event Action OnFailed;
@@ -35,7 +35,7 @@ namespace oojjrs.onet
             }
 
             if (this != default)
-                MyNet.Lobby.StopJoin();
+                MyNet.Room.StopJoin();
         }
     }
 }
