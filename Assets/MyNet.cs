@@ -12,7 +12,7 @@ namespace oojjrs.onet
             private static GameObject _updater;
 
             public static float UpdateIntervalSeconds { get; set; } = 5;
-            public static bool UpdateRequested { get; set; }
+            internal static bool UpdateRequested { get; set; }
 
             private static event Action<LobbyServiceException> OnException;
             private static event Action<List<Unity.Services.Lobbies.Models.Lobby>> OnUpdate;
@@ -49,6 +49,11 @@ namespace oojjrs.onet
             internal static void ThrowException(LobbyServiceException e)
             {
                 OnException?.Invoke(e);
+            }
+
+            public static void TryUpdate()
+            {
+                UpdateRequested = true;
             }
 
             internal static void Update(List<Unity.Services.Lobbies.Models.Lobby> lobbies)

@@ -35,7 +35,7 @@ MyNet.Lobby.StartUpdate(
 ### 수동 업데이트
 
 ```csharp
-MyNet.Lobby.UpdateRequested = true;
+MyNet.Lobby.TryUpdate();
 ```
 
 ---
