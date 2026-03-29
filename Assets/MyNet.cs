@@ -14,12 +14,24 @@ namespace oojjrs.onet
             public static float UpdateIntervalSeconds { get; set; } = 5;
             public static bool UpdateRequested { get; set; }
 
-            public static event Action<LobbyServiceException> OnException;
-            public static event Action<List<Unity.Services.Lobbies.Models.Lobby>> OnUpdate;
+            private static event Action<LobbyServiceException> OnException;
+            private static event Action<List<Unity.Services.Lobbies.Models.Lobby>> OnUpdate;
 
-            public static void StartUpdate()
+            public static void StartUpdate(Action<List<Unity.Services.Lobbies.Models.Lobby>> onUpdate = default, Action<LobbyServiceException> onException = default)
             {
                 StopUpdate();
+
+                if (onException != default)
+                {
+                    OnException -= onException;
+                    OnException += onException;
+                }
+
+                if (onUpdate != default)
+                {
+                    OnUpdate -= onUpdate;
+                    OnUpdate += onUpdate;
+                }
 
                 _updater = new GameObject(nameof(MyNetLobbyUpdater), typeof(MyNetLobbyUpdater));
             }
