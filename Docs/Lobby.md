@@ -1,6 +1,6 @@
 # Lobby
 
-로비 조회 및 생성 기능을 제공합니다.
+로비 조회, 생성, 참가 기능을 제공합니다.
 
 ---
 
@@ -8,9 +8,9 @@
 
 - 로비 목록 자동 조회 (Polling)
 - 수동 업데이트 요청
-- 로비 생성 기능
+- 로비 생성
+- 로비 참가
 - 콜백 기반 결과 전달
-- 예외 전달
 - Time.timeScale의 영향을 받지 않음
 
 ---
@@ -21,6 +21,7 @@
 
 ```csharp
 MyNet.Lobby.StartUpdate(
+    5f,
     lobbies =>
     {
         Debug.Log($"Lobby Count: {lobbies.Count}");
@@ -41,14 +42,6 @@ MyNet.Lobby.RequestUpdate();
 
 ---
 
-### 업데이트 간격 설정
-
-```csharp
-MyNet.Lobby.UpdateIntervalSeconds = 2f;
-```
-
----
-
 ### 중지
 
 ```csharp
@@ -59,24 +52,24 @@ MyNet.Lobby.StopUpdate();
 
 ## 로비 생성
 
-### ConfigInterface 구현
+### CreateConfigInterface 구현
 
 ```csharp
-class MyLobbyConfig : MyNet.Lobby.ConfigInterface
+class MyLobbyConfig : MyNet.Lobby.CreateConfigInterface
 {
     public string Title => "My Lobby";
     public int MaxPlayers => 4;
     public bool IsPrivate => false;
     public string Account => "player_001";
 
-    public IEnumerable<Field> LobbyFields => new[]
+    public IEnumerable<MyNet.Lobby.Field> LobbyFields => new[]
     {
-        new Field { key = "mode", value = "rank", visibility = Field.VisibilityEnum.Public }
+        new MyNet.Lobby.Field { key = "mode", value = "rank", visibility = MyNet.Lobby.Field.VisibilityEnum.Public }
     };
 
-    public IEnumerable<Field> PlayerFields => new[]
+    public IEnumerable<MyNet.Lobby.Field> PlayerFields => new[]
     {
-        new Field { key = "rank", value = "gold", visibility = Field.VisibilityEnum.Member }
+        new MyNet.Lobby.Field { key = "rank", value = "gold", visibility = MyNet.Lobby.Field.VisibilityEnum.Member }
     };
 }
 ```
@@ -112,15 +105,63 @@ MyNet.Lobby.StopCreate();
 
 ---
 
+## 로비 참가
+
+### JoinConfigInterface 구현
+
+```csharp
+class MyJoinConfig : MyNet.Lobby.JoinConfigInterface
+{
+    public string Account => "player_001";
+    public string LobbyId => "LOBBY_ID";
+
+    public IEnumerable<MyNet.Lobby.Field> PlayerFields => new[]
+    {
+        new MyNet.Lobby.Field { key = "rank", value = "gold", visibility = MyNet.Lobby.Field.VisibilityEnum.Member }
+    };
+}
+```
+
+---
+
+### 참가
+
+```csharp
+MyNet.Lobby.StartJoin(
+    new MyJoinConfig(),
+    lobby =>
+    {
+        Debug.Log($"Joined Lobby: {lobby.Id}");
+    },
+    () =>
+    {
+        Debug.LogError("Join Failed");
+    },
+    exception =>
+    {
+        Debug.LogError(exception);
+    });
+```
+
+---
+
+### 중지
+
+```csharp
+MyNet.Lobby.StopJoin();
+```
+
+---
+
 ## 콜백
 
 ```csharp
 // Update
 Action<List<Lobby>> onUpdate
 
-// Create
-Action<Lobby> onCreate
-Action onCreateFailed
+// Create / Join
+Action<Lobby> onOk
+Action onFailed
 
 // 공통
 Action<LobbyServiceException> onException
@@ -131,9 +172,9 @@ Action<LobbyServiceException> onException
 ## 동작 방식
 
 - `Time.realtimeSinceStartup` 기반
-- 내부 `MonoBehaviour`를 통해 실행
-- updater / creator GameObject 자동 생성 및 제거
-- async 처리 중 객체 파괴 안전 처리 포함
+- 기능별 MonoBehaviour 실행
+- GameObject 자동 생성 및 제거
+- async 안전 처리 포함
 
 ---
 
@@ -141,12 +182,13 @@ Action<LobbyServiceException> onException
 
 - Update → `MyNetLobbyUpdater` :contentReference[oaicite:0]{index=0}  
 - Create → `MyNetLobbyCreator` :contentReference[oaicite:1]{index=1}  
-- API Entry → `MyNet.Lobby` :contentReference[oaicite:2]{index=2}  
+- Join → `MyNetLobbyJoiner` :contentReference[oaicite:2]{index=2}  
+- API Entry → `MyNet.Lobby` :contentReference[oaicite:3]{index=3}  
 
 ---
 
 ## 주의 사항
 
 - 내부 GameObject는 자동 관리됨
-- 직접 `Updater` / `Creator`를 붙이지 말 것
+- 직접 컴포넌트를 추가하지 말 것
 - Unity Services 초기화 후 사용 필요

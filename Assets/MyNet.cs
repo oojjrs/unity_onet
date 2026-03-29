@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Unity.Services.Lobbies;
+using Unity.Services.Lobbies.Models;
 using UnityEngine;
 
 namespace oojjrs.onet
@@ -9,23 +10,23 @@ namespace oojjrs.onet
     {
         public static class Lobby
         {
-            public interface ConfigInterface
+            // TODO: 아직 indexing 기능은 지원하지 않...
+            public struct Field
             {
-                // TODO: 아직 indexing 기능은 지원하지 않...
-                public struct Field
+                public enum VisibilityEnum
                 {
-                    public enum VisibilityEnum
-                    {
-                        Public,
-                        Member,
-                        Private,
-                    }
-
-                    public string key;
-                    public string value;
-                    public VisibilityEnum visibility;
+                    Public,
+                    Member,
+                    Private,
                 }
 
+                public string key;
+                public string value;
+                public VisibilityEnum visibility;
+            }
+
+            public interface CreateConfigInterface
+            {
                 string Account { get; }
                 IEnumerable<Field> LobbyFields { get; }
                 bool IsPrivate { get; }
@@ -34,62 +35,65 @@ namespace oojjrs.onet
                 string Title { get; }
             }
 
+            public interface JoinConfigInterface
+            {
+                string Account { get; }
+                string LobbyId { get; }
+                IEnumerable<Field> PlayerFields { get; }
+            }
+
             private static GameObject _creator;
+            private static GameObject _joiner;
             private static GameObject _updater;
-
-            internal static ConfigInterface Config { get; private set; }
-
-            public static float UpdateIntervalSeconds { get; set; } = 5;
-            internal static bool UpdateRequested { get; set; }
-
-            private static event Action<Unity.Services.Lobbies.Models.Lobby> OnCreate;
-            private static event Action OnCreateFailed;
-            private static event Action<LobbyServiceException> OnException;
-            private static event Action<List<Unity.Services.Lobbies.Models.Lobby>> OnUpdate;
-
-            internal static void RaiseCreated(Unity.Services.Lobbies.Models.Lobby lobby)
-            {
-                OnCreate?.Invoke(lobby);
-            }
-
-            internal static void RaiseCreateFailed()
-            {
-                OnCreateFailed?.Invoke();
-            }
-
-            internal static void RaiseException(LobbyServiceException e)
-            {
-                OnException?.Invoke(e);
-            }
 
             public static void RequestUpdate()
             {
-                UpdateRequested = true;
+                if (_updater != default)
+                {
+                    var c = _updater.GetComponent<MyNetLobbyUpdater>();
+                    c.UpdateRequested = true;
+                }
             }
 
-            public static void StartCreate(ConfigInterface config, Action<Unity.Services.Lobbies.Models.Lobby> onCreate = default, Action onCreateFailed = default, Action<LobbyServiceException> onException = default)
+            public static void StartCreate(CreateConfigInterface config, Action<Unity.Services.Lobbies.Models.Lobby> onOk = default, Action onFailed = default, Action<LobbyServiceException> onException = default)
             {
-                Config = config;
+                StopCreate();
 
-                if (onCreate != default)
-                {
-                    OnCreate -= onCreate;
-                    OnCreate += onCreate;
-                }
+                var go = new GameObject(nameof(MyNetLobbyCreator), typeof(MyNetLobbyCreator));
+                var c = go.GetComponent<MyNetLobbyCreator>();
+                c.Config = config;
+                c.OnOk += onOk;
+                c.OnFailed += onFailed;
+                c.OnException += onException;
 
-                if (onCreateFailed != default)
-                {
-                    OnCreateFailed -= onCreateFailed;
-                    OnCreateFailed += onCreateFailed;
-                }
+                _creator = go;
+            }
 
-                if (onException != default)
-                {
-                    OnException -= onException;
-                    OnException += onException;
-                }
+            public static void StartJoin(JoinConfigInterface config, Action<Unity.Services.Lobbies.Models.Lobby> onOk = default, Action onFailed = default, Action<LobbyServiceException> onException = default)
+            {
+                StopJoin();
 
-                _creator = new GameObject(nameof(MyNetLobbyCreator), typeof(MyNetLobbyCreator));
+                var go = new GameObject(nameof(MyNetLobbyJoiner), typeof(MyNetLobbyJoiner));
+                var c = go.GetComponent<MyNetLobbyJoiner>();
+                c.Config = config;
+                c.OnOk += onOk;
+                c.OnFailed += onFailed;
+                c.OnException += onException;
+
+                _joiner = go;
+            }
+
+            public static void StartUpdate(float updateIntervalSeconds = 5, Action<List<Unity.Services.Lobbies.Models.Lobby>> onUpdate = default, Action<LobbyServiceException> onException = default)
+            {
+                StopUpdate();
+
+                var go = new GameObject(nameof(MyNetLobbyUpdater), typeof(MyNetLobbyUpdater));
+                var c = go.GetComponent<MyNetLobbyUpdater>();
+                c.UpdateIntervalSeconds = updateIntervalSeconds;
+                c.OnException += onException;
+                c.OnUpdate += onUpdate;
+
+                _updater = go;
             }
 
             public static void StopCreate()
@@ -102,23 +106,14 @@ namespace oojjrs.onet
                 }
             }
 
-            public static void StartUpdate(Action<List<Unity.Services.Lobbies.Models.Lobby>> onUpdate = default, Action<LobbyServiceException> onException = default)
+            public static void StopJoin()
             {
-                StopUpdate();
-
-                if (onException != default)
+                if (_joiner != default)
                 {
-                    OnException -= onException;
-                    OnException += onException;
-                }
+                    UnityEngine.Object.Destroy(_joiner);
 
-                if (onUpdate != default)
-                {
-                    OnUpdate -= onUpdate;
-                    OnUpdate += onUpdate;
+                    _joiner = default;
                 }
-
-                _updater = new GameObject(nameof(MyNetLobbyUpdater), typeof(MyNetLobbyUpdater));
             }
 
             public static void StopUpdate()
@@ -131,9 +126,26 @@ namespace oojjrs.onet
                 }
             }
 
-            internal static void Update(List<Unity.Services.Lobbies.Models.Lobby> lobbies)
+            internal static PlayerDataObject ToPlayerDataObject(MyNet.Lobby.Field field)
             {
-                OnUpdate?.Invoke(lobbies);
+                return new PlayerDataObject(Convert(field.visibility), field.value);
+
+                static PlayerDataObject.VisibilityOptions Convert(MyNet.Lobby.Field.VisibilityEnum e)
+                {
+                    return e switch
+                    {
+                        MyNet.Lobby.Field.VisibilityEnum.Public => PlayerDataObject.VisibilityOptions.Public,
+                        MyNet.Lobby.Field.VisibilityEnum.Member => PlayerDataObject.VisibilityOptions.Member,
+                        MyNet.Lobby.Field.VisibilityEnum.Private => PlayerDataObject.VisibilityOptions.Private,
+                        _ => HandleException(e),
+                    };
+
+                    static PlayerDataObject.VisibilityOptions HandleException(MyNet.Lobby.Field.VisibilityEnum e)
+                    {
+                        Debug.LogWarning($"{typeof(MyNet).Namespace}> UNEXPECTED VALUE: {e}. FALLING BACK TO PUBLIC.");
+                        return PlayerDataObject.VisibilityOptions.Public;
+                    }
+                }
             }
         }
     }

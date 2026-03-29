@@ -1,0 +1,42 @@
+﻿using System;
+using System.Linq;
+using Unity.Services.Lobbies;
+using Unity.Services.Lobbies.Models;
+using UnityEngine;
+
+namespace oojjrs.onet
+{
+    public class MyNetLobbyJoiner : MonoBehaviour
+    {
+        public MyNet.Lobby.JoinConfigInterface Config { get; set; }
+
+        public event Action<LobbyServiceException> OnException;
+        public event Action OnFailed;
+        public event Action<Lobby> OnOk;
+
+        private async void Start()
+        {
+            try
+            {
+                var lobby = await LobbyService.Instance.JoinLobbyByIdAsync(Config.LobbyId, new()
+                {
+                    Player = new(id: Config.Account, data: Config.PlayerFields.ToDictionary(t => t.key, t => MyNet.Lobby.ToPlayerDataObject(t))),
+                });
+                if (this != default)
+                {
+                    if (lobby != default)
+                        OnOk?.Invoke(lobby);
+                    else
+                        OnFailed?.Invoke();
+                }
+            }
+            catch (LobbyServiceException e)
+            {
+                OnException?.Invoke(e);
+            }
+
+            if (this != default)
+                MyNet.Lobby.StopJoin();
+        }
+    }
+}

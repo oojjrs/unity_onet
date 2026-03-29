@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
@@ -7,75 +8,57 @@ namespace oojjrs.onet
 {
     public class MyNetLobbyCreator : MonoBehaviour
     {
+        public MyNet.Lobby.CreateConfigInterface Config { get; set; }
+
+        public event Action<LobbyServiceException> OnException;
+        public event Action OnFailed;
+        public event Action<Lobby> OnOk;
+
         private async void Start()
         {
             try
             {
-                var lobby = await LobbyService.Instance.CreateLobbyAsync(MyNet.Lobby.Config.Title, MyNet.Lobby.Config.MaxPlayers, new()
+                var lobby = await LobbyService.Instance.CreateLobbyAsync(Config.Title, Config.MaxPlayers, new()
                 {
-                    Data = MyNet.Lobby.Config.LobbyFields.ToDictionary(t => t.key, t => ToLobbyDataObject(t)),
-                    IsPrivate = MyNet.Lobby.Config.IsPrivate,
-                    Player = new(id: MyNet.Lobby.Config.Account, data: MyNet.Lobby.Config.PlayerFields.ToDictionary(t => t.key, t => ToPlayerDataObject(t))),
+                    Data = Config.LobbyFields.ToDictionary(t => t.key, t => ToLobbyDataObject(t)),
+                    IsPrivate = Config.IsPrivate,
+                    Player = new(id: Config.Account, data: Config.PlayerFields.ToDictionary(t => t.key, t => MyNet.Lobby.ToPlayerDataObject(t))),
                 });
 
                 if (this != default)
                 {
                     if (lobby != default)
-                        MyNet.Lobby.RaiseCreated(lobby);
+                        OnOk?.Invoke(lobby);
                     else
-                        MyNet.Lobby.RaiseCreateFailed();
+                        OnFailed?.Invoke();
                 }
             }
             catch (LobbyServiceException e)
             {
-                Debug.LogWarning(e);
-
-                MyNet.Lobby.RaiseException(e);
+                OnException?.Invoke(e);
             }
 
             if (this != default)
                 MyNet.Lobby.StopCreate();
 
-            DataObject ToLobbyDataObject(MyNet.Lobby.ConfigInterface.Field field)
+            DataObject ToLobbyDataObject(MyNet.Lobby.Field field)
             {
                 return new DataObject(Convert(field.visibility), field.value);
 
-                DataObject.VisibilityOptions Convert(MyNet.Lobby.ConfigInterface.Field.VisibilityEnum e)
+                DataObject.VisibilityOptions Convert(MyNet.Lobby.Field.VisibilityEnum e)
                 {
                     return e switch
                     {
-                        MyNet.Lobby.ConfigInterface.Field.VisibilityEnum.Public => DataObject.VisibilityOptions.Public,
-                        MyNet.Lobby.ConfigInterface.Field.VisibilityEnum.Member => DataObject.VisibilityOptions.Member,
-                        MyNet.Lobby.ConfigInterface.Field.VisibilityEnum.Private => DataObject.VisibilityOptions.Private,
+                        MyNet.Lobby.Field.VisibilityEnum.Public => DataObject.VisibilityOptions.Public,
+                        MyNet.Lobby.Field.VisibilityEnum.Member => DataObject.VisibilityOptions.Member,
+                        MyNet.Lobby.Field.VisibilityEnum.Private => DataObject.VisibilityOptions.Private,
                         _ => HandleException(e),
                     };
 
-                    DataObject.VisibilityOptions HandleException(MyNet.Lobby.ConfigInterface.Field.VisibilityEnum e)
+                    DataObject.VisibilityOptions HandleException(MyNet.Lobby.Field.VisibilityEnum e)
                     {
                         Debug.LogWarning($"{name}> UNEXPECTED VALUE: {e}. FALLING BACK TO PUBLIC.");
                         return DataObject.VisibilityOptions.Public;
-                    }
-                }
-            }
-
-            PlayerDataObject ToPlayerDataObject(MyNet.Lobby.ConfigInterface.Field field)
-            {
-                return new PlayerDataObject(Convert(field.visibility), field.value);
-
-                PlayerDataObject.VisibilityOptions Convert(MyNet.Lobby.ConfigInterface.Field.VisibilityEnum e)
-                {
-                    return e switch
-                    {
-                        MyNet.Lobby.ConfigInterface.Field.VisibilityEnum.Public => PlayerDataObject.VisibilityOptions.Public,
-                        MyNet.Lobby.ConfigInterface.Field.VisibilityEnum.Member => PlayerDataObject.VisibilityOptions.Member,
-                        MyNet.Lobby.ConfigInterface.Field.VisibilityEnum.Private => PlayerDataObject.VisibilityOptions.Private,
-                        _ => HandleException(e),
-                    };
-
-                    PlayerDataObject.VisibilityOptions HandleException(MyNet.Lobby.ConfigInterface.Field.VisibilityEnum e)
-                    {
-                        Debug.LogWarning($"{name}> UNEXPECTED VALUE: {e}. FALLING BACK TO PUBLIC.");
-                        return PlayerDataObject.VisibilityOptions.Public;
                     }
                 }
             }

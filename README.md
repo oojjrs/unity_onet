@@ -9,6 +9,7 @@ Unity Netcode 및 Services를 위한 경량 헬퍼 유틸리티입니다.
 
 ```csharp
 MyNet.Lobby.StartUpdate(
+    5f,
     lobbies =>
     {
         Debug.Log($"Lobby Count: {lobbies.Count}");
@@ -25,6 +26,7 @@ MyNet.Lobby.StartUpdate(
 
 - 로비 조회 (Polling) → [Docs/Lobby.md](Docs/Lobby.md)
 - 로비 생성 (Create)
+- 로비 참가 (Join)
 
 ---
 
@@ -54,6 +56,6 @@ MyNet.Lobby.StartUpdate(
 ## 설계 방향
 
 - 내부 이벤트 기반 + 외부 콜백 인터페이스
-- 불필요한 추상화 배제
+- MonoBehaviour 단위 실행 모델
+- 기능별 GameObject 분리 (Updater / Creator / Joiner)
 - 최소한의 런타임 오버헤드
-- Unity 친화적인 GameObject 기반 실행 구조

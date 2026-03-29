@@ -1,4 +1,6 @@
-﻿using Unity.Services.Lobbies;
+﻿using System;
+using System.Collections.Generic;
+using Unity.Services.Lobbies;
 using UnityEngine;
 
 namespace oojjrs.onet
@@ -7,27 +9,31 @@ namespace oojjrs.onet
     {
         private float _nextLobbyUpdateAtSeconds;
 
+        public float UpdateIntervalSeconds { get; set; }
+        public bool UpdateRequested { get; set; }
+
+        public event Action<LobbyServiceException> OnException;
+        public event Action<List<Unity.Services.Lobbies.Models.Lobby>> OnUpdate;
+
         private async void Update()
         {
             // time scale이나 프레임 영향이 없어야 하므로 Time.time을 사용할 수 없다.
             var time = Time.realtimeSinceStartup;
-            if (MyNet.Lobby.UpdateRequested || (time >= _nextLobbyUpdateAtSeconds))
+            if (UpdateRequested || (time >= _nextLobbyUpdateAtSeconds))
             {
-                _nextLobbyUpdateAtSeconds = time + MyNet.Lobby.UpdateIntervalSeconds;
+                _nextLobbyUpdateAtSeconds = time + UpdateIntervalSeconds;
 
-                MyNet.Lobby.UpdateRequested = false;
+                UpdateRequested = false;
 
                 try
                 {
                     var response = await LobbyService.Instance.QueryLobbiesAsync();
                     if (this != default)
-                        MyNet.Lobby.Update(response.Results);
+                        OnUpdate?.Invoke(response.Results);
                 }
                 catch (LobbyServiceException e)
                 {
-                    Debug.LogWarning(e);
-
-                    MyNet.Lobby.RaiseException(e);
+                    OnException?.Invoke(e);
                 }
             }
         }
