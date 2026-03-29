@@ -5,9 +5,9 @@ using UnityEngine;
 
 namespace oojjrs.onet
 {
-    public class MyNetLobbyJoiner : MonoBehaviour
+    public class MyNetPlayerUpdater : MonoBehaviour
     {
-        public MyNet.Lobby.JoinConfigInterface Config { get; set; }
+        public MyNet.Player.UpdateConfigInterface Config { get; set; }
 
         public event Action<LobbyServiceException> OnException;
         public event Action OnFailed;
@@ -17,12 +17,13 @@ namespace oojjrs.onet
         {
             try
             {
-                var lobby = await LobbyService.Instance.JoinLobbyByIdAsync(Config.LobbyId, new()
+                var lobby = await LobbyService.Instance.UpdatePlayerAsync(Config.LobbyId, Config.PlayerId, new()
                 {
-                    Player = new(id: Config.Account, data: MyNet.ToPlayerData(Config.PlayerFields)),
+                    Data = MyNet.ToPlayerData(Config.PlayerFields),
                 });
                 if (this != default)
                 {
+                    // 유니티는 무조건 적용/동기화되었다고 간주하는 모양임.
                     if (lobby != default)
                         OnOk?.Invoke(lobby);
                     else
@@ -35,7 +36,7 @@ namespace oojjrs.onet
             }
 
             if (this != default)
-                MyNet.Lobby.StopJoin();
+                Destroy(gameObject);
         }
     }
 }

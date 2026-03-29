@@ -22,7 +22,7 @@ namespace oojjrs.onet
                 {
                     Data = Config.LobbyFields.ToDictionary(t => t.key, t => ToLobbyDataObject(t)),
                     IsPrivate = Config.IsPrivate,
-                    Player = new(id: Config.Account, data: Config.PlayerFields.ToDictionary(t => t.key, t => MyNet.Lobby.ToPlayerDataObject(t))),
+                    Player = new(id: Config.Account, data: MyNet.ToPlayerData(Config.PlayerFields)),
                 });
 
                 if (this != default)
@@ -41,21 +41,21 @@ namespace oojjrs.onet
             if (this != default)
                 MyNet.Lobby.StopCreate();
 
-            DataObject ToLobbyDataObject(MyNet.Lobby.Field field)
+            DataObject ToLobbyDataObject(MyNet.Field field)
             {
                 return new DataObject(Convert(field.visibility), field.value);
 
-                DataObject.VisibilityOptions Convert(MyNet.Lobby.Field.VisibilityEnum e)
+                DataObject.VisibilityOptions Convert(MyNet.Field.VisibilityEnum e)
                 {
                     return e switch
                     {
-                        MyNet.Lobby.Field.VisibilityEnum.Public => DataObject.VisibilityOptions.Public,
-                        MyNet.Lobby.Field.VisibilityEnum.Member => DataObject.VisibilityOptions.Member,
-                        MyNet.Lobby.Field.VisibilityEnum.Private => DataObject.VisibilityOptions.Private,
+                        MyNet.Field.VisibilityEnum.Public => DataObject.VisibilityOptions.Public,
+                        MyNet.Field.VisibilityEnum.Member => DataObject.VisibilityOptions.Member,
+                        MyNet.Field.VisibilityEnum.Private => DataObject.VisibilityOptions.Private,
                         _ => HandleException(e),
                     };
 
-                    DataObject.VisibilityOptions HandleException(MyNet.Lobby.Field.VisibilityEnum e)
+                    DataObject.VisibilityOptions HandleException(MyNet.Field.VisibilityEnum e)
                     {
                         Debug.LogWarning($"{name}> UNEXPECTED VALUE: {e}. FALLING BACK TO PUBLIC.");
                         return DataObject.VisibilityOptions.Public;
