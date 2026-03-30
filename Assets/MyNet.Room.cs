@@ -40,6 +40,7 @@ namespace oojjrs.onet
             }
 
             private static GameObject _creator;
+            private static GameObject _heartbeat;
             private static GameObject _joiner;
             private static GameObject _updater;
 
@@ -67,6 +68,17 @@ namespace oojjrs.onet
 
                 c.OnException += onException;
                 c.OnOk += onOk;
+            }
+
+            // 샘플들이 다 15초라서 그냥 따라함.
+            public static void StartHeartbeat(float heartbeatIntervalSeconds = 15, float errorIntervalSeconds = 5)
+            {
+                var go = new GameObject(nameof(MyNetRoomHeartbeat), typeof(MyNetRoomHeartbeat));
+                var c = go.GetComponent<MyNetRoomHeartbeat>();
+                c.ErrorIntervalSeconds = errorIntervalSeconds;
+                c.HeartbeatIntervalSeconds = heartbeatIntervalSeconds;
+
+                _heartbeat = go;
             }
 
             public static void StartJoin(JoinConfigInterface config, Action<Unity.Services.Lobbies.Models.Lobby> onOk = default, Action onFailed = default, Action<LobbyServiceException> onException = default)
@@ -106,6 +118,16 @@ namespace oojjrs.onet
                     UnityEngine.Object.Destroy(_creator);
 
                     _creator = default;
+                }
+            }
+
+            public static void StopHeartbeat()
+            {
+                if (_heartbeat != default)
+                {
+                    UnityEngine.Object.Destroy(_heartbeat);
+
+                    _heartbeat = default;
                 }
             }
 
