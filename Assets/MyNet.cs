@@ -6,6 +6,8 @@ namespace oojjrs.onet
 {
     public static partial class MyNet
     {
+        internal const string PlayerPropertyNickname = "__Nickname__";
+
         // TODO: 아직 indexing 기능은 지원하지 않...
         public struct Field
         {

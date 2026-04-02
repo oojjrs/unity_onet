@@ -7,7 +7,7 @@ namespace oojjrs.onet
 {
     public class MyNetRoomCreator : MonoBehaviour
     {
-        public MyNet.Room.CreateConfigInterface Config { get; set; }
+        public MyNet.MyRoom.CreateConfigInterface Config { get; set; }
 
         public event Action<LobbyServiceException> OnException;
         public event Action OnFailed;
@@ -38,7 +38,7 @@ namespace oojjrs.onet
             }
 
             if (this != default)
-                MyNet.Room.StopCreate();
+                MyNet.MyRoom.StopCreate();
         }
     }
 }

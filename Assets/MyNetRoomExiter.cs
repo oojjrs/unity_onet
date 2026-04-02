@@ -6,7 +6,7 @@ namespace oojjrs.onet
 {
     public class MyNetRoomExiter : MonoBehaviour
     {
-        public MyNet.Room.ExitConfigInterface Config { get; set; }
+        public MyNet.MyRoom.ExitConfigInterface Config { get; set; }
 
         public event Action<LobbyServiceException> OnException;
         public event Action<string, string> OnOk;

@@ -7,7 +7,7 @@ namespace oojjrs.onet
 {
     public static partial class MyNet
     {
-        public static class Room
+        public static class MyRoom
         {
             public interface CreateConfigInterface
             {

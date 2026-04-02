@@ -7,7 +7,7 @@ namespace oojjrs.onet
 {
     public class MyNetRoomUpdater : MonoBehaviour
     {
-        public MyNet.Room.UpdateConfigInterface Config { get; set; }
+        public MyNet.MyRoom.UpdateConfigInterface Config { get; set; }
 
         public event Action<LobbyServiceException> OnException;
         public event Action OnFailed;
@@ -36,7 +36,7 @@ namespace oojjrs.onet
             }
 
             if (this != default)
-                MyNet.Room.StopUpdate();
+                MyNet.MyRoom.StopUpdate();
         }
     }
 }

@@ -7,7 +7,7 @@ namespace oojjrs.onet
 {
     public static partial class MyNet
     {
-        public static class Lobby
+        public static class MyLobby
         {
             private static GameObject _updater;
 

@@ -7,7 +7,7 @@ namespace oojjrs.onet
 {
     public class MyNetPlayerUpdater : MonoBehaviour
     {
-        public MyNet.Player.UpdateConfigInterface Config { get; set; }
+        public MyNet.MyPlayer.UpdateConfigInterface Config { get; set; }
 
         public event Action<LobbyServiceException> OnException;
         public event Action OnFailed;

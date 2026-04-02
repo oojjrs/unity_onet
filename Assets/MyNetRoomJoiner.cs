@@ -7,7 +7,7 @@ namespace oojjrs.onet
 {
     public class MyNetRoomJoiner : MonoBehaviour
     {
-        public MyNet.Room.JoinConfigInterface Config { get; set; }
+        public MyNet.MyRoom.JoinConfigInterface Config { get; set; }
 
         public event Action<LobbyServiceException> OnException;
         public event Action OnFailed;
@@ -35,7 +35,7 @@ namespace oojjrs.onet
             }
 
             if (this != default)
-                MyNet.Room.StopJoin();
+                MyNet.MyRoom.StopJoin();
         }
     }
 }
