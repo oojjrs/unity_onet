@@ -12,5 +12,7 @@ namespace oojjrs.onet
         int PlayerCount { get; }
         int PlayerCountMax { get; }
         IEnumerable<MyPlayerInterface> Players { get; }
+
+        string GetData(string key);
     }
 }

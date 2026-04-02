@@ -31,5 +31,13 @@ namespace oojjrs.onet
             _player = player;
             _room = room;
         }
+
+        string MyPlayerInterface.GetData(string key)
+        {
+            if (_player.Data.TryGetValue(key, out var value))
+                return value.Value;
+            else
+                return string.Empty;
+        }
     }
 }

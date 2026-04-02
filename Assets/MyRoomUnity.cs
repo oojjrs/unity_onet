@@ -30,5 +30,13 @@ namespace oojjrs.onet
         {
             _lobby = lobby;
         }
+
+        string MyRoomInterface.GetData(string key)
+        {
+            if (_lobby.Data.TryGetValue(key, out var value))
+                return value.Value;
+            else
+                return string.Empty;
+        }
     }
 }
