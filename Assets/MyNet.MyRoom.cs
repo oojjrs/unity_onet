@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Unity.Services.Lobbies;
+using Unity.Services.Lobbies.Models;
 using UnityEngine;
 
 namespace oojjrs.onet
@@ -15,6 +15,7 @@ namespace oojjrs.onet
                 bool IsPrivate { get; }
                 int MaxPlayers { get; }
                 IEnumerable<Field> PlayerFields { get; }
+                string PlayerNickname { get; }
                 IEnumerable<Field> RoomFields { get; }
                 string Title { get; }
             }
@@ -28,8 +29,9 @@ namespace oojjrs.onet
             public interface JoinConfigInterface
             {
                 string Account { get; }
-                string RoomId { get; }
                 IEnumerable<Field> PlayerFields { get; }
+                string PlayerNickname { get; }
+                string RoomId { get; }
             }
 
             public interface UpdateConfigInterface
@@ -42,9 +44,20 @@ namespace oojjrs.onet
             private static GameObject _creator;
             private static GameObject _heartbeat;
             private static GameObject _joiner;
+            private static readonly Dictionary<Lobby, MyRoomUnity> _unityRooms = new();
             private static GameObject _updater;
 
-            public static void StartCreate(CreateConfigInterface config, Action<Unity.Services.Lobbies.Models.Lobby> onOk = default, Action onFailed = default, Action<LobbyServiceException> onException = default)
+            internal static MyRoomInterface GetOrCreate(Lobby lobby)
+            {
+                if (_unityRooms.TryGetValue(lobby, out var value))
+                    return value;
+
+                value = new MyRoomUnity(lobby);
+                _unityRooms[lobby] = value;
+                return value;
+            }
+
+            public static void StartCreate(CreateConfigInterface config, Action<MyRoomInterface> onOk = default, Action onFailed = default, Action<MyNetException> onException = default)
             {
                 StopCreate();
 
@@ -60,7 +73,7 @@ namespace oojjrs.onet
             }
 
             // 이 로직은 추방에도 사용되므로 여러 번 들어올 수 있다.
-            public static void StartExit(ExitConfigInterface config, Action<string, string> onOk = default, Action<LobbyServiceException> onException = default)
+            public static void StartExit(ExitConfigInterface config, Action<string, string> onOk = default, Action<MyNetException> onException = default)
             {
                 var go = new GameObject(nameof(MyNetRoomExiter), typeof(MyNetRoomExiter));
                 var c = go.GetComponent<MyNetRoomExiter>();
@@ -81,7 +94,7 @@ namespace oojjrs.onet
                 _heartbeat = go;
             }
 
-            public static void StartJoin(JoinConfigInterface config, Action<Unity.Services.Lobbies.Models.Lobby> onOk = default, Action onFailed = default, Action<LobbyServiceException> onException = default)
+            public static void StartJoin(JoinConfigInterface config, Action<MyRoomInterface> onOk = default, Action onFailed = default, Action<MyNetException> onException = default)
             {
                 StopJoin();
 
@@ -96,7 +109,7 @@ namespace oojjrs.onet
                 _joiner = go;
             }
 
-            public static void StartUpdate(UpdateConfigInterface config, Action<Unity.Services.Lobbies.Models.Lobby> onOk = default, Action onFailed = default, Action<LobbyServiceException> onException = default)
+            public static void StartUpdate(UpdateConfigInterface config, Action<MyRoomInterface> onOk = default, Action onFailed = default, Action<MyNetException> onException = default)
             {
                 StopUpdate();
 

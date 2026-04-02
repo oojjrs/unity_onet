@@ -3,7 +3,7 @@ using Unity.Services.Lobbies.Models;
 
 namespace oojjrs.onet
 {
-    public class MyPlayerUnity : MyPlayerInterface, MyNet.MyPlayer.UpdateConfigInterface
+    internal class MyPlayerUnity : MyPlayerInterface, MyNet.MyPlayer.UpdateConfigInterface
     {
         private string _nickname;
         private readonly Player _player;
@@ -25,7 +25,7 @@ namespace oojjrs.onet
         string MyNet.MyPlayer.UpdateConfigInterface.PlayerId => _player.Id;
         string MyNet.MyPlayer.UpdateConfigInterface.RoomId => _room.Id;
 
-        public MyPlayerUnity(MyRoomInterface room, Player player, string nickname)
+        internal MyPlayerUnity(MyRoomInterface room, Player player, string nickname)
         {
             _nickname = nickname;
             _player = player;

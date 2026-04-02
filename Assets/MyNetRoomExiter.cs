@@ -4,11 +4,11 @@ using UnityEngine;
 
 namespace oojjrs.onet
 {
-    public class MyNetRoomExiter : MonoBehaviour
+    internal class MyNetRoomExiter : MonoBehaviour
     {
         public MyNet.MyRoom.ExitConfigInterface Config { get; set; }
 
-        public event Action<LobbyServiceException> OnException;
+        public event Action<MyNetException> OnException;
         public event Action<string, string> OnOk;
 
         private async void Start()
@@ -22,7 +22,7 @@ namespace oojjrs.onet
             }
             catch (LobbyServiceException e)
             {
-                OnException?.Invoke(e);
+                OnException?.Invoke(MyNet.ToException(e));
             }
 
             if (this != default)

@@ -1,38 +1,37 @@
 ﻿using System;
 using Unity.Services.Lobbies;
-using Unity.Services.Lobbies.Models;
 using UnityEngine;
 
 namespace oojjrs.onet
 {
-    public class MyNetRoomUpdater : MonoBehaviour
+    internal class MyNetRoomUpdater : MonoBehaviour
     {
         public MyNet.MyRoom.UpdateConfigInterface Config { get; set; }
 
-        public event Action<LobbyServiceException> OnException;
+        public event Action<MyNetException> OnException;
         public event Action OnFailed;
-        public event Action<Lobby> OnOk;
+        public event Action<MyRoomInterface> OnOk;
 
         private async void Start()
         {
             try
             {
-                var room = await LobbyService.Instance.UpdateLobbyAsync(Config.RoomId, new()
+                var lobby = await LobbyService.Instance.UpdateLobbyAsync(Config.RoomId, new()
                 {
                     Data = MyNet.ToRoomData(Config.RoomFields),
                     IsPrivate = Config.IsPrivate,
                 });
                 if (this != default)
                 {
-                    if (room != default)
-                        OnOk?.Invoke(room);
+                    if (lobby != default)
+                        OnOk?.Invoke(MyNet.MyRoom.GetOrCreate(lobby));
                     else
                         OnFailed?.Invoke();
                 }
             }
             catch (LobbyServiceException e)
             {
-                OnException?.Invoke(e);
+                OnException?.Invoke(MyNet.ToException(e));
             }
 
             if (this != default)

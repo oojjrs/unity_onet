@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
 
@@ -29,7 +28,7 @@ namespace oojjrs.onet
                 };
             }
 
-            public static MyPlayerInterface GetOrCreate(Player player, Func<MyPlayerUnity> onFallback)
+            internal static MyPlayerInterface GetOrCreate(Player player, Func<MyPlayerUnity> onFallback)
             {
                 if (_unityPlayers.TryGetValue(player, out var value))
                     return value;
@@ -39,7 +38,7 @@ namespace oojjrs.onet
                 return value;
             }
 
-            public static void StartUpdate(UpdateConfigInterface config, Action<Lobby> onOk = default, Action onFailed = default, Action<LobbyServiceException> onException = default)
+            public static void StartUpdate(UpdateConfigInterface config, Action<MyRoomInterface> onOk = default, Action onFailed = default, Action<MyNetException> onException = default)
             {
                 var go = new GameObject(nameof(MyNetPlayerUpdater), typeof(MyNetPlayerUpdater));
                 var c = go.GetComponent<MyNetPlayerUpdater>();

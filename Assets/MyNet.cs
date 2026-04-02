@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 
 namespace oojjrs.onet
 {
     public static partial class MyNet
     {
-        internal const string PlayerPropertyNickname = "__Nickname__";
-
         // TODO: 아직 indexing 기능은 지원하지 않...
         public struct Field
         {
@@ -23,9 +22,25 @@ namespace oojjrs.onet
             public VisibilityEnum visibility;
         }
 
+        internal const string PlayerPropertyNickname = "__Nickname__";
+
+        internal static MyNetException ToException(LobbyServiceException e)
+        {
+            return new(e.Reason.ToString(), (int)e.Reason, e.Message, e);
+        }
+
         internal static Dictionary<string, PlayerDataObject> ToPlayerData(IEnumerable<Field> fields)
         {
-            return fields.ToDictionary(t => t.key, t => ToPlayerDataObject(t));
+            return ToPlayerData(fields, string.Empty);
+        }
+
+        internal static Dictionary<string, PlayerDataObject> ToPlayerData(IEnumerable<Field> fields, string nickname)
+        {
+            var dic = fields.ToDictionary(t => t.key, t => ToPlayerDataObject(t));
+            if (string.IsNullOrWhiteSpace(nickname) == false)
+                dic.Add(MyNet.PlayerPropertyNickname, new(PlayerDataObject.VisibilityOptions.Public, nickname));
+
+            return dic;
 
             static PlayerDataObject ToPlayerDataObject(MyNet.Field field)
             {

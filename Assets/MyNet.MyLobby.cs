@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Unity.Services.Lobbies;
 using UnityEngine;
 
 namespace oojjrs.onet
@@ -20,7 +19,7 @@ namespace oojjrs.onet
                 }
             }
 
-            public static void StartUpdate(float updateIntervalSeconds = 5, Action<List<Unity.Services.Lobbies.Models.Lobby>> onUpdate = default, Action<LobbyServiceException> onException = default)
+            public static void StartUpdate(float updateIntervalSeconds = 5, Action<IEnumerable<MyRoomInterface>> onUpdate = default, Action<MyNetException> onException = default)
             {
                 StopUpdate();
 

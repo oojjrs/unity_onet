@@ -5,14 +5,14 @@ using UnityEngine;
 
 namespace oojjrs.onet
 {
-    public class MyNetRoomHeartbeat : MonoBehaviour
+    internal class MyNetRoomHeartbeat : MonoBehaviour
     {
         private float _nextTimeSeconds;
 
         public float ErrorIntervalSeconds { get; set; }
         public float HeartbeatIntervalSeconds { get; set; }
 
-        public event Action<LobbyServiceException> OnException;
+        public event Action<MyNetException> OnException;
 
         private void Awake()
         {
@@ -49,7 +49,7 @@ namespace oojjrs.onet
                 {
                     _nextTimeSeconds += ErrorIntervalSeconds;
 
-                    OnException?.Invoke(e);
+                    OnException?.Invoke(MyNet.ToException(e));
                 }
             }
         }

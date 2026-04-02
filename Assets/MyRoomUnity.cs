@@ -4,7 +4,7 @@ using Unity.Services.Lobbies.Models;
 
 namespace oojjrs.onet
 {
-    public class MyRoomUnity : MyRoomInterface
+    internal class MyRoomUnity : MyRoomInterface
     {
         private readonly Lobby _lobby;
 
@@ -19,13 +19,14 @@ namespace oojjrs.onet
         {
             if (player.Data.TryGetValue(MyNet.PlayerPropertyNickname, out var value))
                 return new(this, player, value.Value);
+            // 프로필에 있는 Name을 쓰면 처음에 데이터 동기화를 안 해준다 이색기가.
             else if (string.IsNullOrWhiteSpace(player.Profile?.Name) == false)
                 return new(this, player, player.Profile.Name);
             else
                 return new(this, player, player.Id);
         }));
 
-        public MyRoomUnity(Lobby lobby)
+        internal MyRoomUnity(Lobby lobby)
         {
             _lobby = lobby;
         }

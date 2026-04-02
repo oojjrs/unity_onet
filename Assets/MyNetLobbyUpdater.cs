@@ -1,19 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Services.Lobbies;
 using UnityEngine;
 
 namespace oojjrs.onet
 {
-    public class MyNetLobbyUpdater : MonoBehaviour
+    internal class MyNetLobbyUpdater : MonoBehaviour
     {
         private float _nextLobbyUpdateAtSeconds;
 
         public float UpdateIntervalSeconds { get; set; }
         public bool UpdateRequested { get; set; }
 
-        public event Action<LobbyServiceException> OnException;
-        public event Action<List<Unity.Services.Lobbies.Models.Lobby>> OnUpdate;
+        public event Action<MyNetException> OnException;
+        public event Action<IEnumerable<MyRoomInterface>> OnUpdate;
 
         private async void Update()
         {
@@ -29,11 +30,11 @@ namespace oojjrs.onet
                 {
                     var response = await LobbyService.Instance.QueryLobbiesAsync();
                     if (this != default)
-                        OnUpdate?.Invoke(response.Results);
+                        OnUpdate?.Invoke(response.Results.Select(lobby => MyNet.MyRoom.GetOrCreate(lobby)));
                 }
                 catch (LobbyServiceException e)
                 {
-                    OnException?.Invoke(e);
+                    OnException?.Invoke(MyNet.ToException(e));
                 }
             }
         }
