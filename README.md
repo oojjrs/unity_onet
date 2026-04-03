@@ -24,10 +24,14 @@ MyNet.Lobby.StartUpdate(
 
 ## 기능
 
-- 로비 조회 (Polling) → [Docs/Lobby.md](Docs/Lobby.md)
+- 로비 조회 (Polling)
 - 로비 생성 (Create)
 - 로비 참가 (Join)
 - 로비 퇴장 / 플레이어 제거 (Exit)
+
+자세한 사용법은 아래 문서를 참고하세요.
+
+- [Docs/Lobby.md](./Docs/Lobby.md)
 
 ---
 
@@ -60,3 +64,18 @@ MyNet.Lobby.StartUpdate(
 - MonoBehaviour 단위 실행 모델
 - 기능별 GameObject 분리 (Updater / Creator / Joiner / Exiter)
 - 최소한의 런타임 오버헤드
+
+---
+
+## 주의 사항
+
+- 본 라이브러리는 Unity Services 초기화 이후 사용해야 합니다.
+- Lobby는 실시간 동기화 시스템이라기보다 상태 저장소에 가깝습니다.
+- 조회는 Polling 기반으로 동작합니다.
+- 내부 GameObject는 자동으로 생성 및 제거됩니다.
+
+---
+
+## License
+
+MIT
