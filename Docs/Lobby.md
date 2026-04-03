@@ -33,15 +33,11 @@ MyNet.Lobby.StartUpdate(
     });
 ```
 
----
-
 ### 수동 업데이트 요청
 
 ```csharp
 MyNet.Lobby.RequestUpdate();
 ```
-
----
 
 ### 중지
 
@@ -85,8 +81,6 @@ class MyLobbyConfig : MyNet.Lobby.CreateConfigInterface
 }
 ```
 
----
-
 ### 생성
 
 ```csharp
@@ -105,8 +99,6 @@ MyNet.Lobby.StartCreate(
         Debug.LogError(exception);
     });
 ```
-
----
 
 ### 중지
 
@@ -138,8 +130,6 @@ class MyJoinConfig : MyNet.Lobby.JoinConfigInterface
 }
 ```
 
----
-
 ### 참가
 
 ```csharp
@@ -158,8 +148,6 @@ MyNet.Lobby.StartJoin(
         Debug.LogError(exception);
     });
 ```
-
----
 
 ### 중지
 
@@ -180,8 +168,6 @@ class MyExitConfig : MyNet.Lobby.ExitConfigInterface
     public string PlayerId => "player_001";
 }
 ```
-
----
 
 ### 퇴장 요청
 
@@ -213,7 +199,7 @@ Action onFailed
 // Exit
 Action<string, string> onOk
 
-// 공통
+// Common
 Action<LobbyServiceException> onException
 ```
 
@@ -241,8 +227,8 @@ Action<LobbyServiceException> onException
 
 ## 주의 사항
 
-- 내부 GameObject는 자동 관리됨
-- 직접 컴포넌트를 추가하지 말 것
-- Unity Services 초기화 후 사용 필요
-- Exit는 `StopExit()` 없이 요청 단위로 동작함
-- Exit는 일반 퇴장뿐 아니라 특정 플레이어 제거 용도로도 사용할 수 있음
+- 내부 GameObject는 자동 관리됩니다.
+- 직접 컴포넌트를 추가하지 않는 것을 권장합니다.
+- Unity Services 초기화 이후 사용해야 합니다.
+- Exit는 `StopExit()` 없이 요청 단위로 동작합니다.
+- Exit는 일반 퇴장뿐 아니라 특정 플레이어 제거 용도로도 사용할 수 있습니다.
