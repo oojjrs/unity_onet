@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Unity.Services.Authentication;
+using Unity.Services.Core;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 
@@ -24,9 +26,19 @@ namespace oojjrs.onet
 
         internal const string PlayerPropertyNickname = "__Nickname__";
 
+        internal static MyAuthenticationException ToException(AuthenticationException e)
+        {
+            return new(e.ErrorCode, e.Message, e, e.Notifications);
+        }
+
         internal static MyNetException ToException(LobbyServiceException e)
         {
             return new(e.Reason.ToString(), (int)e.Reason, e.Message, e);
+        }
+
+        internal static MyRequestFailedException ToException(RequestFailedException e)
+        {
+            return new(e.ErrorCode, e.Message, e);
         }
 
         internal static Dictionary<string, PlayerDataObject> ToPlayerData(IEnumerable<Field> fields)

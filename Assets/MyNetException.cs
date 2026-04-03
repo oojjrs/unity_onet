@@ -2,15 +2,13 @@
 
 namespace oojjrs.onet
 {
-    public class MyNetException : Exception
+    public class MyNetException : MyRequestFailedException
     {
-        public int ErrorCode { get; }
         public string Reason { get; }
 
         internal MyNetException(string reason, int errorCode, string message, Exception innerException)
-            : base(message, innerException)
+            : base(errorCode, message, innerException)
         {
-            ErrorCode = errorCode;
             Reason = reason;
         }
     }
