@@ -1,78 +1,59 @@
 # MyNet
 
-Unity Netcode 및 Services를 위한 경량 헬퍼 유틸리티입니다.  
-내부적으로 이벤트 기반 구조를 유지하면서, 외부에서는 간결한 콜백 방식으로 사용할 수 있도록 설계되었습니다.
+Unity Multiplayer Services 기반 네트워크 유틸리티.
+
+Unity Services의 복잡한 API를 직접 다루지 않고,  
+간결한 인터페이스로 흐름을 구성하기 위한 레이어.
 
 ---
 
-## 빠른 시작
+## Features
 
-```csharp
-MyNet.Lobby.StartUpdate(
-    5f,
-    lobbies =>
-    {
-        Debug.Log($"Lobby Count: {lobbies.Count}");
-    },
-    exception =>
-    {
-        Debug.LogError(exception);
-    });
-```
+- Auth (인증)
+- Player (플레이어 데이터)
+- Room (상위 개념)
+- Lobby (실제 방)
 
 ---
 
-## 기능
+## Install
 
-- 로비 조회 (Polling)
-- 로비 생성 (Create)
-- 로비 참가 (Join)
-- 로비 퇴장 / 플레이어 제거 (Exit)
-
-자세한 사용법은 아래 문서를 참고하세요.
-
-- [Docs/Lobby.md](./Docs/Lobby.md)
+https://github.com/oojjrs/unity_onet.git
 
 ---
 
-## 의존성
+## Documents
 
-```json
-{
-  "com.unity.services.authentication": "3.5.2",
-  "com.unity.services.deployment": "1.6.2",
-  "com.unity.multiplayer.center": "1.0.1",
-  "com.unity.services.multiplayer": "2.0.0",
-  "com.unity.multiplayer.tools": "2.2.8",
-  "com.unity.netcode.gameobjects": "2.11.0",
-  "com.unity.transport": "2.6.0"
-}
-```
+- Docs/Auth.md
+- Docs/Player.md
+- Docs/Room.md
+- Docs/Lobby.md
 
 ---
 
-## 요구 사항
+## Structure
 
-- Unity 6000.0 이상
-- Unity Services 초기화 필요
-
----
-
-## 설계 방향
-
-- 내부 이벤트 기반 + 외부 콜백 인터페이스
-- MonoBehaviour 단위 실행 모델
-- 기능별 GameObject 분리 (Updater / Creator / Joiner / Exiter)
-- 최소한의 런타임 오버헤드
+- Auth → 인증 처리
+- Player → 플레이어 정보 관리
+- Room → 상위 공간 (로비 집합 개념)
+- Lobby → 실제 방 (Unity Lobby 기반)
 
 ---
 
-## 주의 사항
+## Design
 
-- 본 라이브러리는 Unity Services 초기화 이후 사용해야 합니다.
-- Lobby는 실시간 동기화 시스템이라기보다 상태 저장소에 가깝습니다.
-- 조회는 Polling 기반으로 동작합니다.
-- 내부 GameObject는 자동으로 생성 및 제거됩니다.
+- 인터페이스 기반 요청 구조
+- 기능별 독립 실행 (MonoBehaviour)
+- Polling 기반 상태 갱신
+- 최소한의 추상화
+
+---
+
+## Notes
+
+- Unity Services 초기화 이후 사용
+- Lobby는 상태 저장소 역할
+- 실시간 동기화는 직접 처리
 
 ---
 
