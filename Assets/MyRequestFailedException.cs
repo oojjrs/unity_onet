@@ -2,6 +2,9 @@
 
 namespace oojjrs.onet
 {
+    /// <summary>
+    /// <see cref="MyRequest"/>랑은 관련 없음
+    /// </summary>
     public class MyRequestFailedException : Exception
     {
         public int ErrorCode { get; }
