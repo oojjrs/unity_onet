@@ -4,18 +4,18 @@ using Unity.Services.Lobbies.Models;
 
 namespace oojjrs.onet
 {
-    internal class MyRoomUnity : MyRoomInterface
+    internal class InternalRoomUnity : MyNetRoomInterface
     {
         private readonly Lobby _lobby;
 
-        MyPlayerInterface MyRoomInterface.Host => ((MyRoomInterface)this).Players.FirstOrDefault(t => t.IsHost);
-        string MyRoomInterface.HostId => _lobby.HostId;
-        string MyRoomInterface.Id => _lobby.Id;
-        bool MyRoomInterface.IsPrivate => _lobby.IsPrivate;
-        string MyRoomInterface.Name => _lobby.Name;
-        int MyRoomInterface.PlayerCount => _lobby.Players.Count;
-        int MyRoomInterface.PlayerCountMax => _lobby.MaxPlayers;
-        IEnumerable<MyPlayerInterface> MyRoomInterface.Players => _lobby.Players.Select(player => MyNet.MyPlayer.GetOrCreate(player, () =>
+        MyNetPlayerInterface MyNetRoomInterface.Host => ((MyNetRoomInterface)this).Players.FirstOrDefault(t => t.IsHost);
+        string MyNetRoomInterface.HostId => _lobby.HostId;
+        string MyNetRoomInterface.Id => _lobby.Id;
+        bool MyNetRoomInterface.IsPrivate => _lobby.IsPrivate;
+        string MyNetRoomInterface.Name => _lobby.Name;
+        int MyNetRoomInterface.PlayerCount => _lobby.Players.Count;
+        int MyNetRoomInterface.PlayerCountMax => _lobby.MaxPlayers;
+        IEnumerable<MyNetPlayerInterface> MyNetRoomInterface.Players => _lobby.Players.Select(player => MyNet.Player.GetOrCreate(player, () =>
         {
             if (player.Data.TryGetValue(MyNet.PlayerPropertyNickname, out var value))
                 return new(this, player, value.Value);
@@ -26,12 +26,12 @@ namespace oojjrs.onet
                 return new(this, player, player.Id);
         }));
 
-        internal MyRoomUnity(Lobby lobby)
+        internal InternalRoomUnity(Lobby lobby)
         {
             _lobby = lobby;
         }
 
-        string MyRoomInterface.GetData(string key)
+        string MyNetRoomInterface.GetData(string key)
         {
             if (_lobby.Data.TryGetValue(key, out var value))
                 return value.Value;

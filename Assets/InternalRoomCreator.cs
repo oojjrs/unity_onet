@@ -4,26 +4,29 @@ using UnityEngine;
 
 namespace oojjrs.onet
 {
-    internal class MyNetPlayerUpdater : MonoBehaviour
+    internal class InternalRoomCreator : MonoBehaviour
     {
-        public MyNet.MyPlayer.UpdateConfigInterface Config { get; set; }
+        public MyNet.Room.CreateConfigInterface Config { get; set; }
 
         public event Action<MyNetException> OnException;
         public event Action OnFailed;
-        public event Action<MyRoomInterface> OnOk;
+        public event Action<MyNetRoomInterface> OnOk;
 
         private async void Start()
         {
             try
             {
-                var lobby = await LobbyService.Instance.UpdatePlayerAsync(Config.RoomId, Config.PlayerId, new()
+                var lobby = await LobbyService.Instance.CreateLobbyAsync(Config.Title, Config.MaxPlayers, new()
                 {
-                    Data = MyNet.ToPlayerData(Config.PlayerFields),
+                    Data = MyNet.ToRoomData(Config.RoomFields),
+                    IsPrivate = Config.IsPrivate,
+                    Player = new(id: Config.Account, data: MyNet.ToPlayerData(Config.PlayerFields, Config.PlayerNickname)),
                 });
+
                 if (this != default)
                 {
                     if (lobby != default)
-                        OnOk?.Invoke(MyNet.MyRoom.GetOrCreate(lobby));
+                        OnOk?.Invoke(MyNet.Room.GetOrCreate(lobby));
                     else
                         OnFailed?.Invoke();
                 }
@@ -34,7 +37,7 @@ namespace oojjrs.onet
             }
 
             if (this != default)
-                Destroy(gameObject);
+                MyNet.Room.StopCreate();
         }
     }
 }

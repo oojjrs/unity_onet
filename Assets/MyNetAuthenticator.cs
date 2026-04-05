@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace oojjrs.onet
 {
-    public class MyAuthenticator : MonoBehaviour
+    public class MyNetAuthenticator : MonoBehaviour
     {
         public interface CallbackInterface
         {
@@ -15,9 +15,9 @@ namespace oojjrs.onet
             ILogger Logger { get; }
 
             void OnAuthenticated(string account, string nickname);
-            void OnError(MyAuthenticationException e);
+            void OnError(MyNetAuthenticationException e);
             void OnError(OperationCanceledException e);
-            void OnError(MyRequestFailedException e);
+            void OnError(MyNetRequestFailedException e);
         }
 
         private async void Start()

@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using Unity.Services.Lobbies.Models;
 using UnityEngine;
 
 namespace oojjrs.onet
 {
     public static partial class MyNet
     {
-        public static class MyRoom
+        public static class Room
         {
             public interface CreateConfigInterface
             {
@@ -44,25 +43,25 @@ namespace oojjrs.onet
             private static GameObject _creator;
             private static GameObject _heartbeat;
             private static GameObject _joiner;
-            private static readonly Dictionary<Lobby, MyRoomUnity> _unityRooms = new();
+            private static readonly Dictionary<Unity.Services.Lobbies.Models.Lobby, InternalRoomUnity> _unityRooms = new();
             private static GameObject _updater;
 
-            internal static MyRoomInterface GetOrCreate(Lobby lobby)
+            internal static MyNetRoomInterface GetOrCreate(Unity.Services.Lobbies.Models.Lobby lobby)
             {
                 if (_unityRooms.TryGetValue(lobby, out var value))
                     return value;
 
-                value = new MyRoomUnity(lobby);
+                value = new InternalRoomUnity(lobby);
                 _unityRooms[lobby] = value;
                 return value;
             }
 
-            public static void StartCreate(CreateConfigInterface config, Action<MyRoomInterface> onOk = default, Action onFailed = default, Action<MyNetException> onException = default)
+            public static void StartCreate(CreateConfigInterface config, Action<MyNetRoomInterface> onOk = default, Action onFailed = default, Action<MyNetException> onException = default)
             {
                 StopCreate();
 
-                var go = new GameObject(nameof(MyNetRoomCreator), typeof(MyNetRoomCreator));
-                var c = go.GetComponent<MyNetRoomCreator>();
+                var go = new GameObject(nameof(InternalRoomCreator), typeof(InternalRoomCreator));
+                var c = go.GetComponent<InternalRoomCreator>();
                 c.Config = config;
 
                 c.OnException += onException;
@@ -75,8 +74,8 @@ namespace oojjrs.onet
             // 이 로직은 추방에도 사용되므로 여러 번 들어올 수 있다.
             public static void StartExit(ExitConfigInterface config, Action<string, string> onOk = default, Action<MyNetException> onException = default)
             {
-                var go = new GameObject(nameof(MyNetRoomExiter), typeof(MyNetRoomExiter));
-                var c = go.GetComponent<MyNetRoomExiter>();
+                var go = new GameObject(nameof(InternalRoomExiter), typeof(InternalRoomExiter));
+                var c = go.GetComponent<InternalRoomExiter>();
                 c.Config = config;
 
                 c.OnException += onException;
@@ -86,20 +85,20 @@ namespace oojjrs.onet
             // 샘플들이 다 15초라서 그냥 따라함.
             public static void StartHeartbeat(float heartbeatIntervalSeconds = 15, float errorIntervalSeconds = 5)
             {
-                var go = new GameObject(nameof(MyNetRoomHeartbeat), typeof(MyNetRoomHeartbeat));
-                var c = go.GetComponent<MyNetRoomHeartbeat>();
+                var go = new GameObject(nameof(InternalRoomHeartbeat), typeof(InternalRoomHeartbeat));
+                var c = go.GetComponent<InternalRoomHeartbeat>();
                 c.ErrorIntervalSeconds = errorIntervalSeconds;
                 c.HeartbeatIntervalSeconds = heartbeatIntervalSeconds;
 
                 _heartbeat = go;
             }
 
-            public static void StartJoin(JoinConfigInterface config, Action<MyRoomInterface> onOk = default, Action onFailed = default, Action<MyNetException> onException = default)
+            public static void StartJoin(JoinConfigInterface config, Action<MyNetRoomInterface> onOk = default, Action onFailed = default, Action<MyNetException> onException = default)
             {
                 StopJoin();
 
-                var go = new GameObject(nameof(MyNetRoomJoiner), typeof(MyNetRoomJoiner));
-                var c = go.GetComponent<MyNetRoomJoiner>();
+                var go = new GameObject(nameof(InternalRoomJoiner), typeof(InternalRoomJoiner));
+                var c = go.GetComponent<InternalRoomJoiner>();
                 c.Config = config;
 
                 c.OnException += onException;
@@ -109,12 +108,12 @@ namespace oojjrs.onet
                 _joiner = go;
             }
 
-            public static void StartUpdate(UpdateConfigInterface config, Action<MyRoomInterface> onOk = default, Action onFailed = default, Action<MyNetException> onException = default)
+            public static void StartUpdate(UpdateConfigInterface config, Action<MyNetRoomInterface> onOk = default, Action onFailed = default, Action<MyNetException> onException = default)
             {
                 StopUpdate();
 
-                var go = new GameObject(nameof(MyNetRoomUpdater), typeof(MyNetRoomUpdater));
-                var c = go.GetComponent<MyNetRoomUpdater>();
+                var go = new GameObject(nameof(InternalRoomUpdater), typeof(InternalRoomUpdater));
+                var c = go.GetComponent<InternalRoomUpdater>();
                 c.Config = config;
 
                 c.OnException += onException;

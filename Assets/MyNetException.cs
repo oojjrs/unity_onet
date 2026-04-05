@@ -2,7 +2,7 @@
 
 namespace oojjrs.onet
 {
-    public class MyNetException : MyRequestFailedException
+    public class MyNetException : MyNetRequestFailedException
     {
         public string Reason { get; }
 

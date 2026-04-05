@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace oojjrs.onet
 {
-    internal class MyNetLobbyUpdater : MonoBehaviour
+    internal class InternalLobbyUpdater : MonoBehaviour
     {
         private float _nextLobbyUpdateAtSeconds;
 
@@ -14,7 +14,7 @@ namespace oojjrs.onet
         public bool UpdateRequested { get; set; }
 
         public event Action<MyNetException> OnException;
-        public event Action<IEnumerable<MyRoomInterface>> OnUpdate;
+        public event Action<IEnumerable<MyNetRoomInterface>> OnUpdate;
 
         private async void Update()
         {
@@ -30,7 +30,7 @@ namespace oojjrs.onet
                 {
                     var response = await LobbyService.Instance.QueryLobbiesAsync();
                     if (this != default)
-                        OnUpdate?.Invoke(response.Results.Select(lobby => MyNet.MyRoom.GetOrCreate(lobby)));
+                        OnUpdate?.Invoke(response.Results.Select(lobby => MyNet.Room.GetOrCreate(lobby)));
                 }
                 catch (LobbyServiceException e)
                 {

@@ -6,7 +6,7 @@ namespace oojjrs.onet
 {
     public static partial class MyNet
     {
-        public static class MyLobby
+        public static class Lobby
         {
             private static GameObject _updater;
 
@@ -14,17 +14,17 @@ namespace oojjrs.onet
             {
                 if (_updater != default)
                 {
-                    var c = _updater.GetComponent<MyNetLobbyUpdater>();
+                    var c = _updater.GetComponent<InternalLobbyUpdater>();
                     c.UpdateRequested = true;
                 }
             }
 
-            public static void StartUpdate(float updateIntervalSeconds = 5, Action<IEnumerable<MyRoomInterface>> onUpdate = default, Action<MyNetException> onException = default)
+            public static void StartUpdate(float updateIntervalSeconds = 5, Action<IEnumerable<MyNetRoomInterface>> onUpdate = default, Action<MyNetException> onException = default)
             {
                 StopUpdate();
 
-                var go = new GameObject(nameof(MyNetLobbyUpdater), typeof(MyNetLobbyUpdater));
-                var c = go.GetComponent<MyNetLobbyUpdater>();
+                var go = new GameObject(nameof(InternalLobbyUpdater), typeof(InternalLobbyUpdater));
+                var c = go.GetComponent<InternalLobbyUpdater>();
                 c.UpdateIntervalSeconds = updateIntervalSeconds;
 
                 c.OnException += onException;

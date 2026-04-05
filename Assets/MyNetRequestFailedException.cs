@@ -3,18 +3,18 @@
 namespace oojjrs.onet
 {
     /// <summary>
-    /// <see cref="MyRequest"/>랑은 관련 없음
+    /// <see cref="MyNetRequest"/>랑은 관련 없음
     /// </summary>
-    public class MyRequestFailedException : Exception
+    public class MyNetRequestFailedException : Exception
     {
         public int ErrorCode { get; }
 
-        internal MyRequestFailedException(int errorCode, string message)
+        internal MyNetRequestFailedException(int errorCode, string message)
             : this(errorCode, message, null)
         {
         }
 
-        internal MyRequestFailedException(int errorCode, string message, Exception innerException)
+        internal MyNetRequestFailedException(int errorCode, string message, Exception innerException)
             : base(message, innerException)
         {
             ErrorCode = errorCode;

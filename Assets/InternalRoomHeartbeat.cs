@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace oojjrs.onet
 {
-    internal class MyNetRoomHeartbeat : MonoBehaviour
+    internal class InternalRoomHeartbeat : MonoBehaviour
     {
         private float _nextTimeSeconds;
 

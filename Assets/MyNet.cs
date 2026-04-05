@@ -26,7 +26,7 @@ namespace oojjrs.onet
 
         internal const string PlayerPropertyNickname = "__Nickname__";
 
-        internal static MyAuthenticationException ToException(AuthenticationException e)
+        internal static MyNetAuthenticationException ToException(AuthenticationException e)
         {
             return new(e.ErrorCode, e.Message, e, e.Notifications);
         }
@@ -36,7 +36,7 @@ namespace oojjrs.onet
             return new(e.Reason.ToString(), (int)e.Reason, e.Message, e);
         }
 
-        internal static MyRequestFailedException ToException(RequestFailedException e)
+        internal static MyNetRequestFailedException ToException(RequestFailedException e)
         {
             return new(e.ErrorCode, e.Message, e);
         }

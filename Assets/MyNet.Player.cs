@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using Unity.Services.Lobbies.Models;
 using UnityEngine;
 
 namespace oojjrs.onet
 {
     public static partial class MyNet
     {
-        public static class MyPlayer
+        public static class Player
         {
             public interface UpdateConfigInterface
             {
@@ -16,7 +15,7 @@ namespace oojjrs.onet
                 string RoomId { get; }
             }
 
-            private static readonly Dictionary<Player, MyPlayerUnity> _unityPlayers = new();
+            private static readonly Dictionary<Unity.Services.Lobbies.Models.Player, InternalPlayerUnity> _unityPlayers = new();
 
             internal static IEnumerable<MyNet.Field> GetFields(string nickname)
             {
@@ -28,7 +27,7 @@ namespace oojjrs.onet
                 };
             }
 
-            internal static MyPlayerInterface GetOrCreate(Player player, Func<MyPlayerUnity> onFallback)
+            internal static MyNetPlayerInterface GetOrCreate(Unity.Services.Lobbies.Models.Player player, Func<InternalPlayerUnity> onFallback)
             {
                 if (_unityPlayers.TryGetValue(player, out var value))
                     return value;
@@ -38,10 +37,10 @@ namespace oojjrs.onet
                 return value;
             }
 
-            public static void StartUpdate(UpdateConfigInterface config, Action<MyRoomInterface> onOk = default, Action onFailed = default, Action<MyNetException> onException = default)
+            public static void StartUpdate(UpdateConfigInterface config, Action<MyNetRoomInterface> onOk = default, Action onFailed = default, Action<MyNetException> onException = default)
             {
-                var go = new GameObject(nameof(MyNetPlayerUpdater), typeof(MyNetPlayerUpdater));
-                var c = go.GetComponent<MyNetPlayerUpdater>();
+                var go = new GameObject(nameof(InternalPlayerUpdater), typeof(InternalPlayerUpdater));
+                var c = go.GetComponent<InternalPlayerUpdater>();
                 c.Config = config;
 
                 c.OnException += onException;

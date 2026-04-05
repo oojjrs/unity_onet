@@ -1,6 +1,6 @@
 ﻿namespace oojjrs.onet
 {
-    public interface MyPlayerInterface
+    public interface MyNetPlayerInterface
     {
         string Id { get; }
         bool IsHost { get; }
