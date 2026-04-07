@@ -16,7 +16,7 @@ namespace oojjrs.onet
         public Uri Uri { get; set; }
 
         public event Action OnError;
-        public event Action<string, MyNetResponse, bool> OnReceived;
+        public event Action<MyNetResponse> OnReceived;
         public event Action OnUnauthorized;
 
         private void Awake()
@@ -63,7 +63,7 @@ namespace oojjrs.onet
                                             if (IsLogging)
                                                 Debug.Log($"{name}> RECV ({stream.Length} bytes)");
 
-                                            OnReceived?.Invoke(name, r, IsLogging);
+                                            OnReceived?.Invoke(r);
                                         }
                                     }
                                     else
