@@ -62,7 +62,7 @@ namespace oojjrs.onet
                 return value;
             }
 
-            internal static void StartUpdate(UpdateConfigInterface config, Action<MyNetRoomInterface> onOk = default, Action onFailed = default, Action<MyNetException> onException = default)
+            public static void StartUpdate(UpdateConfigInterface config, Action<MyNetRoomInterface> onOk = default, Action onFailed = default, Action<MyNetException> onException = default)
             {
                 var go = new GameObject(nameof(InternalPlayerUpdater), typeof(InternalPlayerUpdater));
                 var c = go.GetComponent<InternalPlayerUpdater>();
