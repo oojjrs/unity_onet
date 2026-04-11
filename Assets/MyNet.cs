@@ -4,6 +4,7 @@ using Unity.Services.Authentication;
 using Unity.Services.Core;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
+using Unity.Services.Multiplayer;
 using UnityEngine;
 
 namespace oojjrs.onet
@@ -65,6 +66,11 @@ namespace oojjrs.onet
             return new(e.ErrorCode, e.Message, e);
         }
 
+        internal static MyNetSessionException ToException(SessionException e)
+        {
+            return new(e.Message, e.Error, e);
+        }
+
         internal static Dictionary<string, PlayerDataObject> ToPlayerData(IEnumerable<Field> fields)
         {
             return ToPlayerData(fields, string.Empty);
@@ -101,6 +107,42 @@ namespace oojjrs.onet
             }
         }
 
+        internal static Dictionary<string, PlayerProperty> ToPlayerProperties(IEnumerable<Field> fields)
+        {
+            return ToPlayerProperties(fields, string.Empty);
+        }
+
+        internal static Dictionary<string, PlayerProperty> ToPlayerProperties(IEnumerable<Field> fields, string nickname)
+        {
+            var dic = fields.ToDictionary(t => t.key, t => ToPlayerProperty(t));
+            if (string.IsNullOrWhiteSpace(nickname) == false)
+                dic.Add(MyNet.PlayerPropertyNickname, new(nickname, VisibilityPropertyOptions.Public));
+
+            return dic;
+
+            static PlayerProperty ToPlayerProperty(MyNet.Field field)
+            {
+                return new PlayerProperty(field.value, Convert(field.visibility));
+
+                static VisibilityPropertyOptions Convert(MyNet.Field.VisibilityEnum e)
+                {
+                    return e switch
+                    {
+                        MyNet.Field.VisibilityEnum.Public => VisibilityPropertyOptions.Public,
+                        MyNet.Field.VisibilityEnum.Member => VisibilityPropertyOptions.Member,
+                        MyNet.Field.VisibilityEnum.Private => VisibilityPropertyOptions.Private,
+                        _ => HandleException(e),
+                    };
+
+                    static VisibilityPropertyOptions HandleException(MyNet.Field.VisibilityEnum e)
+                    {
+                        UnityEngine.Debug.LogWarning($"{typeof(MyNet).Namespace}> UNEXPECTED VALUE: {e}. FALLING BACK TO PUBLIC.");
+                        return VisibilityPropertyOptions.Public;
+                    }
+                }
+            }
+        }
+
         // 사실 사용처는 룸 밖에 없는데, 모양 맞추느라 여기 갖다놨다.
         internal static Dictionary<string, DataObject> ToRoomData(IEnumerable<Field> fields)
         {
@@ -120,10 +162,37 @@ namespace oojjrs.onet
                         _ => HandleException(e),
                     };
 
-                    DataObject.VisibilityOptions HandleException(MyNet.Field.VisibilityEnum e)
+                    static DataObject.VisibilityOptions HandleException(MyNet.Field.VisibilityEnum e)
                     {
                         UnityEngine.Debug.LogWarning($"{typeof(MyNet).Namespace}> UNEXPECTED VALUE: {e}. FALLING BACK TO PUBLIC.");
                         return DataObject.VisibilityOptions.Public;
+                    }
+                }
+            }
+        }
+
+        internal static Dictionary<string, SessionProperty> ToSessionProperties(IEnumerable<Field> fields)
+        {
+            return fields.ToDictionary(t => t.key, t => ToSessionProperty(t));
+
+            static SessionProperty ToSessionProperty(MyNet.Field field)
+            {
+                return new SessionProperty(field.value, Convert(field.visibility));
+
+                static VisibilityPropertyOptions Convert(MyNet.Field.VisibilityEnum e)
+                {
+                    return e switch
+                    {
+                        MyNet.Field.VisibilityEnum.Public => VisibilityPropertyOptions.Public,
+                        MyNet.Field.VisibilityEnum.Member => VisibilityPropertyOptions.Member,
+                        MyNet.Field.VisibilityEnum.Private => VisibilityPropertyOptions.Private,
+                        _ => HandleException(e),
+                    };
+
+                    static VisibilityPropertyOptions HandleException(MyNet.Field.VisibilityEnum e)
+                    {
+                        UnityEngine.Debug.LogWarning($"{typeof(MyNet).Namespace}> UNEXPECTED VALUE: {e}. FALLING BACK TO PUBLIC.");
+                        return VisibilityPropertyOptions.Public;
                     }
                 }
             }

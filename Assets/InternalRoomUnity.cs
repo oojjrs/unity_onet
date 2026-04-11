@@ -8,12 +8,15 @@ namespace oojjrs.onet
     {
         private readonly Lobby _lobby;
 
+        string MyNetRoomInterface.Code => _lobby.LobbyCode;
+        bool MyNetRoomInterface.HasPassword => _lobby.HasPassword;
         MyNetPlayerInterface MyNetRoomInterface.Host => ((MyNetRoomInterface)this).Players.FirstOrDefault(t => t.IsHost);
         string MyNetRoomInterface.HostId => _lobby.HostId;
         string MyNetRoomInterface.Id => _lobby.Id;
+        bool MyNetRoomInterface.IsLocked => _lobby.IsLocked;
         bool MyNetRoomInterface.IsPrivate => _lobby.IsPrivate;
-        string MyNetRoomInterface.Name => _lobby.Name;
         int MyNetRoomInterface.PlayerCount => _lobby.Players.Count;
+        int MyNetRoomInterface.PlayerCountAvailable => _lobby.AvailableSlots;
         int MyNetRoomInterface.PlayerCountMax => _lobby.MaxPlayers;
         IEnumerable<MyNetPlayerInterface> MyNetRoomInterface.Players => _lobby.Players.Select(player => MyNet.Player.GetOrCreate(player, () =>
         {
@@ -25,6 +28,7 @@ namespace oojjrs.onet
             else
                 return new(this, player, player.Id);
         }));
+        string MyNetRoomInterface.Title => _lobby.Name;
 
         internal InternalRoomUnity(Lobby lobby)
         {

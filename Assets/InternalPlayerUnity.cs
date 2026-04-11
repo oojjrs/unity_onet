@@ -11,16 +11,7 @@ namespace oojjrs.onet
 
         string MyNetPlayerInterface.Id => _player.Id;
         bool MyNetPlayerInterface.IsHost => _player.Id == _room.HostId;
-        string MyNetPlayerInterface.Nickname
-        {
-            get => _nickname;
-            set
-            {
-                _nickname = value;
-                MyNet.Player.StartUpdate(this);
-            }
-        }
-
+        string MyNetPlayerInterface.Nickname => ((MyNetPlayerInterface)this).GetData(MyNet.PlayerPropertyNickname);
         IEnumerable<MyNet.Field> MyNet.Player.UpdateConfigInterface.PlayerFields => MyNet.Player.GetFields(_nickname);
         string MyNet.Player.UpdateConfigInterface.PlayerId => _player.Id;
         string MyNet.Player.UpdateConfigInterface.RoomId => _room.Id;

@@ -4,14 +4,18 @@ namespace oojjrs.onet
 {
     public interface MyNetRoomInterface
     {
+        string Code { get; }
+        bool HasPassword { get; }
         MyNetPlayerInterface Host { get; }
         string HostId { get; }
         string Id { get; }
+        bool IsLocked { get; }
         bool IsPrivate { get; }
-        string Name { get; }
         int PlayerCount { get; }
+        int PlayerCountAvailable { get; }
         int PlayerCountMax { get; }
         IEnumerable<MyNetPlayerInterface> Players { get; }
+        string Title { get; }
 
         string GetData(string key);
     }

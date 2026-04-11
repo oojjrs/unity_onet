@@ -12,6 +12,11 @@ namespace oojjrs.onet
         public event Action OnFailed;
         public event Action<MyNetRoomInterface> OnOk;
 
+        private void Awake()
+        {
+            DontDestroyOnLoad(gameObject);
+        }
+
         private async void Start()
         {
             try
@@ -32,9 +37,11 @@ namespace oojjrs.onet
             {
                 OnException?.Invoke(MyNet.ToException(e));
             }
-
-            if (this != default)
-                Destroy(gameObject);
+            finally
+            {
+                if (this != default)
+                    Destroy(gameObject);
+            }
         }
     }
 }

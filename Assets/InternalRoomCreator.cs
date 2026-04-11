@@ -12,6 +12,11 @@ namespace oojjrs.onet
         public event Action OnFailed;
         public event Action<MyNetRoomInterface> OnOk;
 
+        private void Awake()
+        {
+            DontDestroyOnLoad(gameObject);
+        }
+
         private async void Start()
         {
             try
@@ -20,7 +25,7 @@ namespace oojjrs.onet
                 {
                     Data = MyNet.ToRoomData(Config.RoomFields),
                     IsPrivate = Config.IsPrivate,
-                    Player = new(id: Config.Account, data: MyNet.ToPlayerData(Config.PlayerFields, Config.PlayerNickname)),
+                    Player = new(id: Guid.NewGuid().ToString(), data: MyNet.ToPlayerData(Config.PlayerFields, Config.PlayerNickname)),
                 });
 
                 if (this != default)
@@ -35,9 +40,11 @@ namespace oojjrs.onet
             {
                 OnException?.Invoke(MyNet.ToException(e));
             }
-
-            if (this != default)
-                MyNet.Room.StopCreate();
+            finally
+            {
+                if (this != default)
+                    MyNet.Room.StopCreate();
+            }
         }
     }
 }

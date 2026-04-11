@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Unity.Services.Multiplayer;
 using UnityEngine;
 
 namespace oojjrs.onet
@@ -10,9 +13,11 @@ namespace oojjrs.onet
         {
             public interface CreateConfigInterface
             {
-                string Account { get; }
+                CancellationToken CancellationToken { get; }
+                bool IsLocked { get; }
                 bool IsPrivate { get; }
                 int MaxPlayers { get; }
+                string Password { get; }
                 IEnumerable<Field> PlayerFields { get; }
                 string PlayerNickname { get; }
                 IEnumerable<Field> RoomFields { get; }
@@ -28,6 +33,9 @@ namespace oojjrs.onet
             public interface JoinConfigInterface
             {
                 string Account { get; }
+                CancellationToken CancellationToken { get; }
+                string Code { get; }
+                string Password { get; }
                 IEnumerable<Field> PlayerFields { get; }
                 string PlayerNickname { get; }
                 string RoomId { get; }
@@ -42,18 +50,164 @@ namespace oojjrs.onet
 
             private static GameObject _creator;
             private static GameObject _heartbeat;
+            private static bool _isBusy;
             private static GameObject _joiner;
+            private static readonly Dictionary<ISession, InternalRoomSession> _sessionRooms = new();
             private static readonly Dictionary<Unity.Services.Lobbies.Models.Lobby, InternalRoomUnity> _unityRooms = new();
             private static GameObject _updater;
+
+            public static async Task CreateAsync(CreateConfigInterface config, Action<MyNetRoomInterface> onOk = default, Action onBusy = default, Action onFailed = default, Action<Exception> onException = default)
+            {
+                await RunBusyOperationAsync(async () =>
+                {
+                    var session = await MultiplayerService.Instance.CreateSessionAsync(new()
+                    {
+                        IsLocked = config.IsLocked,
+                        IsPrivate = config.IsPrivate,
+                        MaxPlayers = config.MaxPlayers,
+                        Name = config.Title,
+                        Password = config.Password,
+                        PlayerProperties = MyNet.ToPlayerProperties(config.PlayerFields, config.PlayerNickname),
+                        SessionProperties = MyNet.ToSessionProperties(config.RoomFields),
+                    });
+
+                    if (config.CancellationToken.IsCancellationRequested == false)
+                    {
+                        if (session != default)
+                            onOk?.Invoke(MyNet.Room.GetOrCreate(session));
+                        else
+                            onFailed?.Invoke();
+                    }
+                }, onBusy, onException);
+            }
+
+            // Kick은 여러번 들어올 수 있으므로 Busy에 엮지 않는다.
+            public static async Task KickAsync(ExitConfigInterface config, Action onOk = default, Action onFailed = default, Action<Exception> onException = default)
+            {
+                try
+                {
+                    if (MultiplayerService.Instance.Sessions.TryGetValue(config.RoomId, out var session))
+                    {
+                        await session.AsHost().RemovePlayerAsync(config.PlayerId);
+
+                        onOk?.Invoke();
+                    }
+                    else
+                    {
+                        onFailed?.Invoke();
+                    }
+                }
+                catch (SessionException e)
+                {
+                    onException?.Invoke(e);
+                }
+            }
+
+            public static async Task LeaveAsync(ExitConfigInterface config, Action onOk = default, Action onBusy = default, Action onFailed = default, Action<Exception> onException = default)
+            {
+                await RunBusyOperationAsync(async () =>
+                {
+                    if (MultiplayerService.Instance.Sessions.TryGetValue(config.RoomId, out var session))
+                    {
+                        if (config.PlayerId == session.CurrentPlayer.Id)
+                        {
+                            await session.LeaveAsync();
+
+                            onOk?.Invoke();
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException();
+                        }
+                    }
+                    else
+                    {
+                        onFailed?.Invoke();
+                    }
+                }, onBusy, onException);
+            }
 
             internal static MyNetRoomInterface GetOrCreate(Unity.Services.Lobbies.Models.Lobby lobby)
             {
                 if (_unityRooms.TryGetValue(lobby, out var value))
                     return value;
 
-                value = new InternalRoomUnity(lobby);
+                value = new(lobby);
                 _unityRooms[lobby] = value;
                 return value;
+            }
+
+            internal static MyNetRoomInterface GetOrCreate(ISession session)
+            {
+                if (_sessionRooms.TryGetValue(session, out var value))
+                    return value;
+
+                value = new(session);
+                _sessionRooms[session] = value;
+                return value;
+            }
+
+            public static async Task JoinByCodeAsync(JoinConfigInterface config, Action<MyNetRoomInterface> onOk = default, Action onBusy = default, Action onFailed = default, Action<Exception> onException = default)
+            {
+                await RunBusyOperationAsync(async () =>
+                {
+                    var session = await MultiplayerService.Instance.JoinSessionByCodeAsync(config.Code, new()
+                    {
+                        PlayerProperties = MyNet.ToPlayerProperties(config.PlayerFields, config.PlayerNickname),
+                    });
+
+                    if (config.CancellationToken.IsCancellationRequested == false)
+                    {
+                        if (session != default)
+                            onOk?.Invoke(MyNet.Room.GetOrCreate(session));
+                        else
+                            onFailed?.Invoke();
+                    }
+                }, onBusy, onException);
+            }
+
+            public static async Task JoinByIdAsync(JoinConfigInterface config, Action<MyNetRoomInterface> onOk = default, Action onBusy = default, Action onFailed = default, Action<Exception> onException = default)
+            {
+                await RunBusyOperationAsync(async () =>
+                {
+                    var session = await MultiplayerService.Instance.JoinSessionByIdAsync(config.RoomId, new()
+                    {
+                        Password = config.Password,
+                        PlayerProperties = MyNet.ToPlayerProperties(config.PlayerFields, config.PlayerNickname),
+                    });
+
+                    if (config.CancellationToken.IsCancellationRequested == false)
+                    {
+                        if (session != default)
+                            onOk?.Invoke(MyNet.Room.GetOrCreate(session));
+                        else
+                            onFailed?.Invoke();
+                    }
+                }, onBusy, onException);
+            }
+
+            private static async Task RunBusyOperationAsync(Func<Task> operation, Action onBusy, Action<Exception> onException)
+            {
+                if (_isBusy)
+                {
+                    onBusy?.Invoke();
+                    return;
+                }
+
+                _isBusy = true;
+
+                try
+                {
+                    await operation();
+                }
+                catch (Exception e)
+                {
+                    onException?.Invoke(e);
+                }
+                finally
+                {
+                    _isBusy = false;
+                }
             }
 
             public static void StartCreate(CreateConfigInterface config, Action<MyNetRoomInterface> onOk = default, Action onFailed = default, Action<MyNetException> onException = default)
