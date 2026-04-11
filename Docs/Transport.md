@@ -1,73 +1,73 @@
 ﻿# Transport
 
-This document describes how packets move through MyNet.
+이 문서는 MyNet에서 패킷이 어떻게 이동하는지를 설명합니다.
 
-## Overview
+## 개요
 
-MyNet is organized around two packet queues:
+MyNet은 두 개의 패킷 큐를 중심으로 구성됩니다.
 
 - `MyNet.Packets.Client`
 - `MyNet.Packets.Server`
 
-The client side owns outgoing `MyNetRequest` packets and incoming `MyNetResponse` packets.
-The server side owns incoming `MyNetRequest` packets and outgoing `MyNetResponse` packets.
+클라이언트 측은 나가는 `MyNetRequest`와 들어오는 `MyNetResponse`를 가집니다.
+서버 측은 들어오는 `MyNetRequest`와 나가는 `MyNetResponse`를 가집니다.
 
-The transport layer is responsible only for moving packets between those two sides.
+transport 계층은 이 두 영역 사이에서 패킷을 이동시키는 역할만 담당합니다.
 
-## Current Transport
+## 현재 transport
 
 ### `Loopback`
 
-`Loopback` is an in-process transport.
+`Loopback`은 같은 프로세스 안에서 동작하는 transport입니다.
 
-It does not serialize packets onto a real network connection. Instead, it forwards packets between the client queue and the server queue inside the same Unity process.
+실제 네트워크 연결로 패킷을 시리얼라이즈해 보내는 대신, 같은 Unity 프로세스 안에서 클라이언트 큐와 서버 큐 사이로 패킷을 옮깁니다.
 
-Even though it is local, it is intentionally treated as asynchronous behavior. Code should not assume that sending a request immediately produces a response in the same frame.
+다만 로컬 transport라고 해서 동기 호출처럼 취급하지는 않습니다. request를 보낸 직후 같은 프레임 안에서 response가 도착한다고 가정하면 안 됩니다.
 
-This helps reduce behavior differences between local testing and real network-backed transports.
+이 규칙은 로컬 테스트와 실제 네트워크 transport 사이의 동작 차이를 줄이기 위한 것입니다.
 
-## Public Packet Flow
+## 공개 패킷 흐름
 
-### Client side
+### 클라이언트 측
 
-Send a request:
+요청 보내기:
 
 ```csharp
 MyNet.Packets.Client.Send(request);
 ```
 
-Receive a response:
+응답 받기:
 
 ```csharp
 if (MyNet.Packets.Client.TryDequeue(out MyNetResponse response))
 {
-    // Handle response.
+    // 응답 처리
 }
 ```
 
-### Server side
+### 서버 측
 
-Receive a request:
+요청 받기:
 
 ```csharp
 if (MyNet.Packets.Server.TryDequeue(out MyNetRequest request))
 {
-    // Handle request.
+    // 요청 처리
 }
 ```
 
-Send a response:
+응답 보내기:
 
 ```csharp
 MyNet.Packets.Server.Send(response);
 ```
 
-## Selecting a Transport
+## Transport 선택
 
-Use `MyNet.SetTransport(...)` to choose the active transport implementation.
+현재 사용할 transport 구현은 `MyNet.SetTransport(...)`로 선택합니다.
 
 ```csharp
 MyNet.SetTransport(MyNet.TransportKindEnum.Loopback);
 ```
 
-The active transport may change at runtime, so callers should treat transport selection as configuration rather than one-time initialization.
+transport는 실행 중에도 바뀔 수 있으므로, 호출부에서는 이를 일회성 초기화가 아니라 설정 변경으로 취급하는 편이 맞습니다.
