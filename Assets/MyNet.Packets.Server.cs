@@ -9,6 +9,11 @@
                 private static readonly HashQueue<MyNetRequest> _requests = new();
                 private static readonly HashQueue<MyNetResponse> _responses = new();
 
+                public static bool HasRequest()
+                {
+                    return _requests.Count > 0;
+                }
+
                 internal static void Receive(MyNetRequest request)
                 {
                     _requests.Enqueue(request);

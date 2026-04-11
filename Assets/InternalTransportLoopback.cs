@@ -4,6 +4,11 @@ namespace oojjrs.onet
 {
     internal class InternalTransportLoopback : MonoBehaviour
     {
+        private void Awake()
+        {
+            DontDestroyOnLoad(gameObject);
+        }
+
         private void Update()
         {
             while (MyNet.Packets.Server.TryDequeue(out MyNetResponse response))

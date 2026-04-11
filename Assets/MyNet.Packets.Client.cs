@@ -14,6 +14,11 @@
                     return _requests.Count > 0;
                 }
 
+                public static bool HasResponse()
+                {
+                    return _responses.Count > 0;
+                }
+
                 internal static void Receive(MyNetResponse response)
                 {
                     _responses.Enqueue(response);
