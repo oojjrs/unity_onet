@@ -1,46 +1,64 @@
-# MyNet
+﻿# MyNet
 
-Unity Multiplayer Services 기반 네트워크 유틸리티.
+MyNet is a Unity networking utility built around request/response packets.
 
-Unity Services의 혼란스러운 네이밍(Lobby = Room)을 보정하여,  
-명확한 구조로 사용할 수 있도록 설계됨.
-
----
+It uses Unity Multiplayer Services where appropriate, while keeping the gameplay-facing API small and explicit.
 
 ## Features
 
-- Auth (인증)
-- Player (플레이어 데이터)
-- Lobby (상위 공간 / 채널)
-- Room (실제 방, Unity Lobby 래핑)
+- Authentication helpers
+- Player and lobby-related data helpers
+- Request/response packet flow
+- Swappable transport entry point
 
----
+## Transport Model
+
+MyNet separates packet ownership from packet transport.
+
+- `MyNet.Packets.Client`
+  Client-side entry point. Sends `MyNetRequest` packets and receives `MyNetResponse` packets.
+- `MyNet.Packets.Server`
+  Server-side entry point. Receives `MyNetRequest` packets and sends `MyNetResponse` packets.
+- `MyNet.SetTransport(...)`
+  Selects how packets move between the client side and the server side.
+
+Current transport kinds:
+
+- `MyNet.TransportKindEnum.Loopback`
+
+`Loopback` does not perform real network I/O. It forwards packets between the client-side queue and the server-side queue inside the same process.
+
+Even so, `Loopback` is intentionally treated as asynchronous transport. It should not be relied on as a same-frame round trip path.
+
+## Basic Flow
+
+```csharp
+MyNet.SetTransport(MyNet.TransportKindEnum.Loopback);
+
+MyNet.Packets.Client.Send(request);
+
+if (MyNet.Packets.Server.TryDequeue(out MyNetRequest serverRequest))
+{
+    // Handle request on the server side.
+    MyNet.Packets.Server.Send(response);
+}
+
+if (MyNet.Packets.Client.TryDequeue(out MyNetResponse clientResponse))
+{
+    // Consume response on the client side.
+}
+```
 
 ## Documents
 
-- Docs/Auth.md
-- Docs/Player.md
-- Docs/Lobby.md
-- Docs/Room.md
-
----
-
-## Structure
-
-- Auth → 인증 처리
-- Player → 플레이어 정보
-- Lobby → 상위 공간 (Room 리스트 관리)
-- Room → 실제 방 (Unity Lobby 기반)
-
----
+- [`Docs/Lobby.md`](Docs/Lobby.md)
+- [`Docs/Transport.md`](Docs/Transport.md)
 
 ## Notes
 
-- Unity Lobby는 내부적으로 Room으로 사용됨
-- Lobby는 별도의 추상 개념
-- 실시간 동기화는 직접 처리 필요
-
----
+- Unity Lobby is used as one of the backing services, but MyNet keeps its own packet-oriented API surface.
+- `Loopback` exists to support local packet flow without making callers depend on synchronous behavior.
+- Real-time transport details may continue to evolve, but the client/server packet boundary is intended to stay clear.
 
 ## License
 

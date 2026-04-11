@@ -36,7 +36,7 @@ namespace oojjrs.onet
                     if (PendingRequest != default)
                         request = PendingRequest;
                     else
-                        MyNet.Packets.TryDequeue(out request);
+                        MyNet.Packets.Client.TryDequeue(out request);
 
                     if (request != default)
                     {
@@ -106,7 +106,7 @@ namespace oojjrs.onet
                         //{
                         //    return false;
                         //}
-                        return MyNet.Packets.HasRequest();
+                        return MyNet.Packets.Client.HasRequest();
                     }
                 }
             }

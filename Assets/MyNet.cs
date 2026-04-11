@@ -4,11 +4,17 @@ using Unity.Services.Authentication;
 using Unity.Services.Core;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
+using UnityEngine;
 
 namespace oojjrs.onet
 {
     public static partial class MyNet
     {
+        public enum TransportKindEnum
+        {
+            Loopback,
+        }
+
         // TODO: 아직 indexing 기능은 지원하지 않...
         public struct Field
         {
@@ -25,6 +31,24 @@ namespace oojjrs.onet
         }
 
         internal const string PlayerPropertyNickname = "__Nickname__";
+        private static GameObject _transportObject;
+
+        public static void SetTransport(TransportKindEnum e)
+        {
+            if (_transportObject != default)
+                Object.DestroyImmediate(_transportObject);
+
+            switch (e)
+            {
+                case TransportKindEnum.Loopback:
+                    _transportObject = new GameObject(nameof(InternalTransportLoopback), typeof(InternalTransportLoopback));
+                    break;
+                default:
+                    Debug.Assert(false, $"{typeof(MyNet).Namespace}> UNSUPPORTED TRANSPORT: {e}. FALLING BACK TO {nameof(InternalTransportLoopback)}.");
+                    _transportObject = new GameObject(nameof(InternalTransportLoopback), typeof(InternalTransportLoopback));
+                    break;
+            }
+        }
 
         internal static MyNetAuthenticationException ToException(AuthenticationException e)
         {
