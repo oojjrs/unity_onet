@@ -6,7 +6,7 @@
   "description": "",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/oojjrs/unity_onet.git?path=/Assets"
+    "url": "git+https://github.com/oojjrs/unity_onet.git?path=/Packages/src"
   },
   "author": {
     "name": "oojjrs",
