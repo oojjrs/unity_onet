@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Unity.Services.Multiplayer;
 using UnityEngine;
@@ -12,6 +13,7 @@ namespace oojjrs.onet
         {
             public interface UpdateConfigInterface
             {
+                CancellationToken CancellationToken { get; }
                 IEnumerable<Field> PlayerFields { get; }
                 string PlayerId { get; }
                 string RoomId { get; }
@@ -65,11 +67,11 @@ namespace oojjrs.onet
                 return value;
             }
 
-            private static async Task RunBusyOperationAsync(Func<Task> operation, Action onBusy, Action<MyNetSessionException> onException)
+            private static async Task RunBusyOperationAsync(Func<Task> operation, MyNetCallbacksInterface callbacks)
             {
                 if (_isBusy)
                 {
-                    onBusy?.Invoke();
+                    callbacks?.OnBusy();
                     return;
                 }
 
@@ -81,7 +83,7 @@ namespace oojjrs.onet
                 }
                 catch (SessionException e)
                 {
-                    onException?.Invoke(MyNet.ToException(e));
+                    callbacks?.OnException(MyNet.ToException(e));
                 }
                 finally
                 {
@@ -89,6 +91,7 @@ namespace oojjrs.onet
                 }
             }
 
+            [Obsolete("Use UpdateAsync instead.")]
             public static void StartUpdate(UpdateConfigInterface config, Action<MyNetRoomInterface> onOk = default, Action onFailed = default, Action<MyNetException> onException = default)
             {
                 var go = new GameObject(nameof(InternalPlayerUpdater), typeof(InternalPlayerUpdater));
@@ -100,11 +103,11 @@ namespace oojjrs.onet
                 c.OnOk += onOk;
             }
 
-            public static async Task UpdateAsync(UpdateConfigInterface config, Action onOk = default, Action onBusy = default, Action onFailed = default, Action<MyNetSessionException> onException = default)
+            public static async Task UpdateAsync(UpdateConfigInterface config, MyNetVoidCallbacksInterface callbacks)
             {
                 if (string.IsNullOrWhiteSpace(config.PlayerId))
                 {
-                    // TODO: 뭔가 해야함
+                    callbacks?.OnFailed(MyNetCallbacksInterface.FailureEnum.EmptyPlayerId);
                     return;
                 }
 
@@ -118,18 +121,19 @@ namespace oojjrs.onet
 
                             await session.SaveCurrentPlayerDataAsync();
 
-                            onOk?.Invoke();
+                            if (config.CancellationToken.IsCancellationRequested == false)
+                                callbacks?.OnOk();
                         }
                         else
                         {
-                            throw new InvalidOperationException();
+                            callbacks?.OnFailed(MyNetCallbacksInterface.FailureEnum.NotPermitted);
                         }
                     }
                     else
                     {
-                        onFailed?.Invoke();
+                        callbacks?.OnFailed(MyNetCallbacksInterface.FailureEnum.NotFoundRoom);
                     }
-                }, onBusy, onException);
+                }, callbacks);
             }
         }
     }

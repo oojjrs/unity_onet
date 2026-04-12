@@ -26,6 +26,7 @@ namespace oojjrs.onet
 
             public interface ExitConfigInterface
             {
+                CancellationToken CancellationToken { get; }
                 string PlayerId { get; }
                 string RoomId { get; }
             }
@@ -43,6 +44,7 @@ namespace oojjrs.onet
 
             public interface UpdateConfigInterface
             {
+                CancellationToken CancellationToken { get; }
                 bool IsPrivate { get; }
                 IEnumerable<Field> RoomFields { get; }
                 string RoomId { get; }
@@ -56,7 +58,7 @@ namespace oojjrs.onet
             private static readonly Dictionary<Unity.Services.Lobbies.Models.Lobby, InternalRoomUnity> _unityRooms = new();
             private static GameObject _updater;
 
-            public static async Task CreateAsync(CreateConfigInterface config, Action<MyNetRoomInterface> onOk = default, Action onBusy = default, Action onFailed = default, Action<MyNetSessionException> onException = default)
+            public static async Task CreateAsync(CreateConfigInterface config, MyNetRoomCallbacksInterface callbacks)
             {
                 await RunBusyOperationAsync(async () =>
                 {
@@ -74,37 +76,50 @@ namespace oojjrs.onet
                     if (config.CancellationToken.IsCancellationRequested == false)
                     {
                         if (session != default)
-                            onOk?.Invoke(MyNet.Room.GetOrCreate(session));
+                            callbacks?.OnOk(MyNet.Room.GetOrCreate(session));
                         else
-                            onFailed?.Invoke();
+                            callbacks?.OnFailed(MyNetCallbacksInterface.FailureEnum.NotFoundRoom);
                     }
-                }, onBusy, onException);
+                }, callbacks);
             }
 
             // Kick은 여러번 들어올 수 있으므로 Busy에 엮지 않는다.
-            public static async Task KickAsync(ExitConfigInterface config, Action onOk = default, Action onFailed = default, Action<MyNetSessionException> onException = default)
+            public static async Task KickAsync(ExitConfigInterface config, MyNetVoidCallbacksInterface callbacks)
             {
+                if (string.IsNullOrWhiteSpace(config.RoomId))
+                {
+                    callbacks?.OnFailed(MyNetCallbacksInterface.FailureEnum.EmptyRoomId);
+                    return;
+                }
+
                 try
                 {
                     if (MultiplayerService.Instance.Sessions.TryGetValue(config.RoomId, out var session))
                     {
                         await session.AsHost().RemovePlayerAsync(config.PlayerId);
 
-                        onOk?.Invoke();
+                        if (config.CancellationToken.IsCancellationRequested == false)
+                            callbacks?.OnOk();
                     }
                     else
                     {
-                        onFailed?.Invoke();
+                        callbacks?.OnFailed(MyNetCallbacksInterface.FailureEnum.NotFoundRoom);
                     }
                 }
                 catch (SessionException e)
                 {
-                    onException?.Invoke(MyNet.ToException(e));
+                    callbacks?.OnException(MyNet.ToException(e));
                 }
             }
 
-            public static async Task LeaveAsync(ExitConfigInterface config, Action onOk = default, Action onBusy = default, Action onFailed = default, Action<MyNetSessionException> onException = default)
+            public static async Task LeaveAsync(ExitConfigInterface config, MyNetVoidCallbacksInterface callbacks)
             {
+                if (string.IsNullOrWhiteSpace(config.RoomId))
+                {
+                    callbacks?.OnFailed(MyNetCallbacksInterface.FailureEnum.EmptyRoomId);
+                    return;
+                }
+
                 await RunBusyOperationAsync(async () =>
                 {
                     if (MultiplayerService.Instance.Sessions.TryGetValue(config.RoomId, out var session))
@@ -113,18 +128,19 @@ namespace oojjrs.onet
                         {
                             await session.LeaveAsync();
 
-                            onOk?.Invoke();
+                            if (config.CancellationToken.IsCancellationRequested == false)
+                                callbacks?.OnOk();
                         }
                         else
                         {
-                            throw new InvalidOperationException();
+                            callbacks?.OnFailed(MyNetCallbacksInterface.FailureEnum.NotPermitted);
                         }
                     }
                     else
                     {
-                        onFailed?.Invoke();
+                        callbacks?.OnFailed(MyNetCallbacksInterface.FailureEnum.NotFoundRoom);
                     }
-                }, onBusy, onException);
+                }, callbacks);
             }
 
             internal static MyNetRoomInterface GetOrCreate(Unity.Services.Lobbies.Models.Lobby lobby)
@@ -160,8 +176,14 @@ namespace oojjrs.onet
                 return value;
             }
 
-            public static async Task JoinByCodeAsync(JoinConfigInterface config, Action<MyNetRoomInterface> onOk = default, Action onBusy = default, Action onFailed = default, Action<MyNetSessionException> onException = default)
+            public static async Task JoinByCodeAsync(JoinConfigInterface config, MyNetRoomCallbacksInterface callbacks)
             {
+                if (string.IsNullOrWhiteSpace(config.Code))
+                {
+                    callbacks?.OnFailed(MyNetCallbacksInterface.FailureEnum.EmptyCode);
+                    return;
+                }
+
                 await RunBusyOperationAsync(async () =>
                 {
                     var session = await MultiplayerService.Instance.JoinSessionByCodeAsync(config.Code, new()
@@ -172,15 +194,21 @@ namespace oojjrs.onet
                     if (config.CancellationToken.IsCancellationRequested == false)
                     {
                         if (session != default)
-                            onOk?.Invoke(MyNet.Room.GetOrCreate(session));
+                            callbacks?.OnOk(MyNet.Room.GetOrCreate(session));
                         else
-                            onFailed?.Invoke();
+                            callbacks?.OnFailed(MyNetCallbacksInterface.FailureEnum.NotFoundRoom);
                     }
-                }, onBusy, onException);
+                }, callbacks);
             }
 
-            public static async Task JoinByIdAsync(JoinConfigInterface config, Action<MyNetRoomInterface> onOk = default, Action onBusy = default, Action onFailed = default, Action<MyNetSessionException> onException = default)
+            public static async Task JoinByIdAsync(JoinConfigInterface config, MyNetRoomCallbacksInterface callbacks)
             {
+                if (string.IsNullOrWhiteSpace(config.RoomId))
+                {
+                    callbacks?.OnFailed(MyNetCallbacksInterface.FailureEnum.EmptyRoomId);
+                    return;
+                }
+
                 await RunBusyOperationAsync(async () =>
                 {
                     var session = await MultiplayerService.Instance.JoinSessionByIdAsync(config.RoomId, new()
@@ -192,18 +220,18 @@ namespace oojjrs.onet
                     if (config.CancellationToken.IsCancellationRequested == false)
                     {
                         if (session != default)
-                            onOk?.Invoke(MyNet.Room.GetOrCreate(session));
+                            callbacks?.OnOk(MyNet.Room.GetOrCreate(session));
                         else
-                            onFailed?.Invoke();
+                            callbacks?.OnFailed(MyNetCallbacksInterface.FailureEnum.NotFoundRoom);
                     }
-                }, onBusy, onException);
+                }, callbacks);
             }
 
-            private static async Task RunBusyOperationAsync(Func<Task> operation, Action onBusy, Action<MyNetSessionException> onException)
+            private static async Task RunBusyOperationAsync(Func<Task> operation, MyNetCallbacksInterface callbacks)
             {
                 if (_isBusy)
                 {
-                    onBusy?.Invoke();
+                    callbacks?.OnBusy();
                     return;
                 }
 
@@ -215,7 +243,7 @@ namespace oojjrs.onet
                 }
                 catch (SessionException e)
                 {
-                    onException?.Invoke(MyNet.ToException(e));
+                    callbacks?.OnException(MyNet.ToException(e));
                 }
                 finally
                 {
@@ -223,6 +251,7 @@ namespace oojjrs.onet
                 }
             }
 
+            [Obsolete("Use CreateAsync instead.")]
             public static void StartCreate(CreateConfigInterface config, Action<MyNetRoomInterface> onOk = default, Action onFailed = default, Action<MyNetException> onException = default)
             {
                 StopCreate();
@@ -239,6 +268,7 @@ namespace oojjrs.onet
             }
 
             // 이 로직은 추방에도 사용되므로 여러 번 들어올 수 있다.
+            [Obsolete("Use LeaveAsync or KickAsync instead.")]
             public static void StartExit(ExitConfigInterface config, Action<string, string> onOk = default, Action<MyNetException> onException = default)
             {
                 var go = new GameObject(nameof(InternalRoomExiter), typeof(InternalRoomExiter));
@@ -250,6 +280,7 @@ namespace oojjrs.onet
             }
 
             // 샘플들이 다 15초라서 그냥 따라함.
+            [Obsolete("Don't use anymore")]
             public static void StartHeartbeat(float heartbeatIntervalSeconds = 15, float errorIntervalSeconds = 5)
             {
                 var go = new GameObject(nameof(InternalRoomHeartbeat), typeof(InternalRoomHeartbeat));
@@ -260,6 +291,7 @@ namespace oojjrs.onet
                 _heartbeat = go;
             }
 
+            [Obsolete("Use JoinByCodeAsync or JoinByIdAsync instead.")]
             public static void StartJoin(JoinConfigInterface config, Action<MyNetRoomInterface> onOk = default, Action onFailed = default, Action<MyNetException> onException = default)
             {
                 StopJoin();
@@ -275,6 +307,7 @@ namespace oojjrs.onet
                 _joiner = go;
             }
 
+            [Obsolete("Use UpdateAsync instead.")]
             public static void StartUpdate(UpdateConfigInterface config, Action<MyNetRoomInterface> onOk = default, Action onFailed = default, Action<MyNetException> onException = default)
             {
                 StopUpdate();
@@ -300,6 +333,7 @@ namespace oojjrs.onet
                 }
             }
 
+            [Obsolete("Don't use anymore")]
             public static void StopHeartbeat()
             {
                 if (_heartbeat != default)
@@ -330,8 +364,14 @@ namespace oojjrs.onet
                 }
             }
 
-            public static async Task UpdateAsync(UpdateConfigInterface config, Action<MyNetRoomInterface> onOk = default, Action onBusy = default, Action onFailed = default, Action<MyNetSessionException> onException = default)
+            public static async Task UpdateAsync(UpdateConfigInterface config, MyNetRoomCallbacksInterface callbacks)
             {
+                if (string.IsNullOrWhiteSpace(config.RoomId))
+                {
+                    callbacks?.OnFailed(MyNetCallbacksInterface.FailureEnum.EmptyRoomId);
+                    return;
+                }
+
                 await RunBusyOperationAsync(async () =>
                 {
                     if (MultiplayerService.Instance.Sessions.TryGetValue(config.RoomId, out var session))
@@ -341,15 +381,16 @@ namespace oojjrs.onet
 
                         await session.AsHost().SavePropertiesAsync();
 
-                        onOk?.Invoke(MyNet.Room.GetOrCreate(session));
+                        if (config.CancellationToken.IsCancellationRequested == false)
+                            callbacks?.OnOk(MyNet.Room.GetOrCreate(session));
                     }
                     else
                     {
-                        onFailed?.Invoke();
+                        callbacks?.OnFailed(MyNetCallbacksInterface.FailureEnum.NotFoundRoom);
                     }
 
 
-                }, onBusy, onException);
+                }, callbacks);
             }
         }
     }
