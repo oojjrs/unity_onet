@@ -56,7 +56,7 @@ namespace oojjrs.onet
             private static readonly Dictionary<Unity.Services.Lobbies.Models.Lobby, InternalRoomUnity> _unityRooms = new();
             private static GameObject _updater;
 
-            public static async Task CreateAsync(CreateConfigInterface config, Action<MyNetRoomInterface> onOk = default, Action onBusy = default, Action onFailed = default, Action<Exception> onException = default)
+            public static async Task CreateAsync(CreateConfigInterface config, Action<MyNetRoomInterface> onOk = default, Action onBusy = default, Action onFailed = default, Action<MyNetSessionException> onException = default)
             {
                 await RunBusyOperationAsync(async () =>
                 {
@@ -82,7 +82,7 @@ namespace oojjrs.onet
             }
 
             // Kick은 여러번 들어올 수 있으므로 Busy에 엮지 않는다.
-            public static async Task KickAsync(ExitConfigInterface config, Action onOk = default, Action onFailed = default, Action<Exception> onException = default)
+            public static async Task KickAsync(ExitConfigInterface config, Action onOk = default, Action onFailed = default, Action<MyNetSessionException> onException = default)
             {
                 try
                 {
@@ -99,11 +99,11 @@ namespace oojjrs.onet
                 }
                 catch (SessionException e)
                 {
-                    onException?.Invoke(e);
+                    onException?.Invoke(MyNet.ToException(e));
                 }
             }
 
-            public static async Task LeaveAsync(ExitConfigInterface config, Action onOk = default, Action onBusy = default, Action onFailed = default, Action<Exception> onException = default)
+            public static async Task LeaveAsync(ExitConfigInterface config, Action onOk = default, Action onBusy = default, Action onFailed = default, Action<MyNetSessionException> onException = default)
             {
                 await RunBusyOperationAsync(async () =>
                 {
@@ -160,7 +160,7 @@ namespace oojjrs.onet
                 return value;
             }
 
-            public static async Task JoinByCodeAsync(JoinConfigInterface config, Action<MyNetRoomInterface> onOk = default, Action onBusy = default, Action onFailed = default, Action<Exception> onException = default)
+            public static async Task JoinByCodeAsync(JoinConfigInterface config, Action<MyNetRoomInterface> onOk = default, Action onBusy = default, Action onFailed = default, Action<MyNetSessionException> onException = default)
             {
                 await RunBusyOperationAsync(async () =>
                 {
@@ -179,7 +179,7 @@ namespace oojjrs.onet
                 }, onBusy, onException);
             }
 
-            public static async Task JoinByIdAsync(JoinConfigInterface config, Action<MyNetRoomInterface> onOk = default, Action onBusy = default, Action onFailed = default, Action<Exception> onException = default)
+            public static async Task JoinByIdAsync(JoinConfigInterface config, Action<MyNetRoomInterface> onOk = default, Action onBusy = default, Action onFailed = default, Action<MyNetSessionException> onException = default)
             {
                 await RunBusyOperationAsync(async () =>
                 {
@@ -199,7 +199,7 @@ namespace oojjrs.onet
                 }, onBusy, onException);
             }
 
-            private static async Task RunBusyOperationAsync(Func<Task> operation, Action onBusy, Action<Exception> onException)
+            private static async Task RunBusyOperationAsync(Func<Task> operation, Action onBusy, Action<MyNetSessionException> onException)
             {
                 if (_isBusy)
                 {
@@ -213,9 +213,9 @@ namespace oojjrs.onet
                 {
                     await operation();
                 }
-                catch (Exception e)
+                catch (SessionException e)
                 {
-                    onException?.Invoke(e);
+                    onException?.Invoke(MyNet.ToException(e));
                 }
                 finally
                 {
