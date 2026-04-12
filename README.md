@@ -1,4 +1,4 @@
-﻿# MyNet
+# MyNet
 
 MyNet은 request/response 패킷 흐름을 중심으로 구성한 Unity 네트워킹 유틸리티입니다.
 
@@ -52,6 +52,7 @@ if (MyNet.Packets.Client.TryDequeue(out MyNetResponse clientResponse))
 ## 문서
 
 - [`Docs/Lobby.md`](Docs/Lobby.md)
+- [`Docs/Room.md`](Docs/Room.md)
 - [`Docs/Transport.md`](Docs/Transport.md)
 
 ## 메모
