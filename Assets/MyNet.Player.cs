@@ -32,6 +32,19 @@ namespace oojjrs.onet
                 }
             }
 
+            internal static MyNetPlayerInterface GetOrCreate(Unity.Services.Lobbies.Models.Player player, Func<InternalPlayerUnity> onFallback)
+            {
+                if (player == default)
+                    return default;
+
+                if (_unityPlayers.TryGetValue(player, out var value))
+                    return value;
+
+                value = onFallback?.Invoke();
+                _unityPlayers[player] = value;
+                return value;
+            }
+
             internal static MyNetPlayerInterface GetOrCreate(IReadOnlyPlayer player, Func<InternalPlayerSession> onFallback)
             {
                 if (player == default)
@@ -44,21 +57,9 @@ namespace oojjrs.onet
                 }
 
                 value = onFallback?.Invoke();
+                value.Player = player;
 
                 _sessionPlayers[player.Id] = value;
-                return value;
-            }
-
-            internal static MyNetPlayerInterface GetOrCreate(Unity.Services.Lobbies.Models.Player player, Func<InternalPlayerUnity> onFallback)
-            {
-                if (player == default)
-                    return default;
-
-                if (_unityPlayers.TryGetValue(player, out var value))
-                    return value;
-
-                value = onFallback?.Invoke();
-                _unityPlayers[player] = value;
                 return value;
             }
 

@@ -52,7 +52,7 @@ namespace oojjrs.onet
             private static GameObject _heartbeat;
             private static bool _isBusy;
             private static GameObject _joiner;
-            private static readonly Dictionary<ISession, InternalRoomSession> _sessionRooms = new();
+            private static readonly Dictionary<string, InternalRoomSession> _sessionRooms = new();
             private static readonly Dictionary<Unity.Services.Lobbies.Models.Lobby, InternalRoomUnity> _unityRooms = new();
             private static GameObject _updater;
 
@@ -129,6 +129,9 @@ namespace oojjrs.onet
 
             internal static MyNetRoomInterface GetOrCreate(Unity.Services.Lobbies.Models.Lobby lobby)
             {
+                if (lobby == default)
+                    return default;
+
                 if (_unityRooms.TryGetValue(lobby, out var value))
                     return value;
 
@@ -139,11 +142,21 @@ namespace oojjrs.onet
 
             internal static MyNetRoomInterface GetOrCreate(ISession session)
             {
-                if (_sessionRooms.TryGetValue(session, out var value))
-                    return value;
+                if (session == default)
+                    return default;
 
-                value = new(session);
-                _sessionRooms[session] = value;
+                if (_sessionRooms.TryGetValue(session.Id, out var value))
+                {
+                    value.Session = session;
+                    return value;
+                }
+
+                value = new()
+                {
+                    Session = session
+                };
+
+                _sessionRooms[session.Id] = value;
                 return value;
             }
 

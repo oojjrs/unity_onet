@@ -4,22 +4,22 @@ using Unity.Services.Multiplayer;
 
 namespace oojjrs.onet
 {
-    internal class InternalRoomSession : MyNetRoomInterface
+    internal class InternalRoomSessionStub : MyNetRoomInterface
     {
-        string MyNetRoomInterface.Code => Session.Code;
+        string MyNetRoomInterface.Code => string.Empty;
         bool MyNetRoomInterface.HasPassword => Session.HasPassword;
-        MyNetPlayerInterface MyNetRoomInterface.Host => ((MyNetRoomInterface)this).Players.FirstOrDefault(t => t.IsHost);
-        string MyNetRoomInterface.HostId => Session.Host;
+        MyNetPlayerInterface MyNetRoomInterface.Host => default;
+        string MyNetRoomInterface.HostId => Session.HostId;
         string MyNetRoomInterface.Id => Session.Id;
         bool MyNetRoomInterface.IsLocked => Session.IsLocked;
-        bool MyNetRoomInterface.IsPrivate => Session.IsPrivate;
-        int MyNetRoomInterface.PlayerCount => Session.PlayerCount;
+        bool MyNetRoomInterface.IsPrivate => false;
+        int MyNetRoomInterface.PlayerCount => Session.MaxPlayers - Session.AvailableSlots;
         int MyNetRoomInterface.PlayerCountAvailable => Session.AvailableSlots;
         int MyNetRoomInterface.PlayerCountMax => Session.MaxPlayers;
-        IEnumerable<MyNetPlayerInterface> MyNetRoomInterface.Players => Session.Players.Select(player => MyNet.Player.GetOrCreate(player, () => new(this)));
+        IEnumerable<MyNetPlayerInterface> MyNetRoomInterface.Players => Enumerable.Empty<MyNetPlayerInterface>();
         string MyNetRoomInterface.Title => Session.Name;
 
-        internal ISession Session { get; set; }
+        internal ISessionInfo Session { get; set; }
 
         string MyNetRoomInterface.GetData(string key)
         {
