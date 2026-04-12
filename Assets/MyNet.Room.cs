@@ -83,66 +83,6 @@ namespace oojjrs.onet
                 }, callbacks);
             }
 
-            // Kick은 여러번 들어올 수 있으므로 Busy에 엮지 않는다.
-            public static async Task KickAsync(ExitConfigInterface config, MyNetVoidCallbacksInterface callbacks)
-            {
-                if (string.IsNullOrWhiteSpace(config.RoomId))
-                {
-                    callbacks?.OnFailed(MyNetCallbacksInterface.FailureEnum.EmptyRoomId);
-                    return;
-                }
-
-                try
-                {
-                    if (MultiplayerService.Instance.Sessions.TryGetValue(config.RoomId, out var session))
-                    {
-                        await session.AsHost().RemovePlayerAsync(config.PlayerId);
-
-                        if (config.CancellationToken.IsCancellationRequested == false)
-                            callbacks?.OnOk();
-                    }
-                    else
-                    {
-                        callbacks?.OnFailed(MyNetCallbacksInterface.FailureEnum.NotFoundRoom);
-                    }
-                }
-                catch (SessionException e)
-                {
-                    callbacks?.OnException(MyNet.ToException(e));
-                }
-            }
-
-            public static async Task LeaveAsync(ExitConfigInterface config, MyNetVoidCallbacksInterface callbacks)
-            {
-                if (string.IsNullOrWhiteSpace(config.RoomId))
-                {
-                    callbacks?.OnFailed(MyNetCallbacksInterface.FailureEnum.EmptyRoomId);
-                    return;
-                }
-
-                await RunBusyOperationAsync(async () =>
-                {
-                    if (MultiplayerService.Instance.Sessions.TryGetValue(config.RoomId, out var session))
-                    {
-                        if (config.PlayerId == session.CurrentPlayer.Id)
-                        {
-                            await session.LeaveAsync();
-
-                            if (config.CancellationToken.IsCancellationRequested == false)
-                                callbacks?.OnOk();
-                        }
-                        else
-                        {
-                            callbacks?.OnFailed(MyNetCallbacksInterface.FailureEnum.NotPermitted);
-                        }
-                    }
-                    else
-                    {
-                        callbacks?.OnFailed(MyNetCallbacksInterface.FailureEnum.NotFoundRoom);
-                    }
-                }, callbacks);
-            }
-
             internal static MyNetRoomInterface GetOrCreate(Unity.Services.Lobbies.Models.Lobby lobby)
             {
                 if (lobby == default)
@@ -223,6 +163,66 @@ namespace oojjrs.onet
                             callbacks?.OnOk(MyNet.Room.GetOrCreate(session));
                         else
                             callbacks?.OnFailed(MyNetCallbacksInterface.FailureEnum.NotFoundRoom);
+                    }
+                }, callbacks);
+            }
+
+            // Kick은 여러번 들어올 수 있으므로 Busy에 엮지 않는다.
+            public static async Task KickAsync(ExitConfigInterface config, MyNetExitCallbacksInterface callbacks)
+            {
+                if (string.IsNullOrWhiteSpace(config.RoomId))
+                {
+                    callbacks?.OnFailed(MyNetCallbacksInterface.FailureEnum.EmptyRoomId);
+                    return;
+                }
+
+                try
+                {
+                    if (MultiplayerService.Instance.Sessions.TryGetValue(config.RoomId, out var session))
+                    {
+                        await session.AsHost().RemovePlayerAsync(config.PlayerId);
+
+                        if (config.CancellationToken.IsCancellationRequested == false)
+                            callbacks?.OnOk(config.RoomId, config.PlayerId);
+                    }
+                    else
+                    {
+                        callbacks?.OnFailed(MyNetCallbacksInterface.FailureEnum.NotFoundRoom);
+                    }
+                }
+                catch (SessionException e)
+                {
+                    callbacks?.OnException(MyNet.ToException(e));
+                }
+            }
+
+            public static async Task LeaveAsync(ExitConfigInterface config, MyNetExitCallbacksInterface callbacks)
+            {
+                if (string.IsNullOrWhiteSpace(config.RoomId))
+                {
+                    callbacks?.OnFailed(MyNetCallbacksInterface.FailureEnum.EmptyRoomId);
+                    return;
+                }
+
+                await RunBusyOperationAsync(async () =>
+                {
+                    if (MultiplayerService.Instance.Sessions.TryGetValue(config.RoomId, out var session))
+                    {
+                        if (config.PlayerId == session.CurrentPlayer.Id)
+                        {
+                            await session.LeaveAsync();
+
+                            if (config.CancellationToken.IsCancellationRequested == false)
+                                callbacks?.OnOk(config.RoomId, config.PlayerId);
+                        }
+                        else
+                        {
+                            callbacks?.OnFailed(MyNetCallbacksInterface.FailureEnum.NotPermitted);
+                        }
+                    }
+                    else
+                    {
+                        callbacks?.OnFailed(MyNetCallbacksInterface.FailureEnum.NotFoundRoom);
                     }
                 }, callbacks);
             }

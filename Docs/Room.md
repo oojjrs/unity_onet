@@ -29,6 +29,11 @@ public interface MyNetRoomCallbacksInterface : MyNetCallbacksInterface
 {
     void OnOk(MyNetRoomInterface room);
 }
+
+public interface MyNetExitCallbacksInterface : MyNetCallbacksInterface
+{
+    void OnOk(string roomId, string playerId);
+}
 ```
 
 `FailureEnum`에는 현재 아래 항목이 있습니다.
@@ -72,13 +77,30 @@ class RoomCallbacks : MyNetRoomCallbacksInterface
 await MyNet.Room.CreateAsync(config, callbacks);
 ```
 
-## 방 참가와 퇴장
+## 방 참가
 
 방 코드를 알고 있을 때는 `JoinByCodeAsync(...)`, 방 ID를 알고 있을 때는 `JoinByIdAsync(...)`를 사용합니다.
 
 ```csharp
 await MyNet.Room.JoinByCodeAsync(config, callbacks);
 await MyNet.Room.JoinByIdAsync(config, callbacks);
+```
+
+## 방 퇴장과 추방
+
+`LeaveAsync(...)`와 `KickAsync(...)`는 `MyNetExitCallbacksInterface`를 사용하며, 성공 시 `roomId`와 `playerId`를 함께 돌려줍니다.
+
+```csharp
+class ExitCallbacks : MyNetExitCallbacksInterface
+{
+    public void OnBusy() => Debug.Log("busy");
+    public void OnException(MyNetSessionException e) => Debug.LogException(e);
+    public void OnFailed(MyNetCallbacksInterface.FailureEnum e) => Debug.LogWarning(e);
+    public void OnOk(string roomId, string playerId) => Debug.Log($"{roomId} / {playerId}");
+}
+```
+
+```csharp
 await MyNet.Room.LeaveAsync(config, callbacks);
 await MyNet.Room.KickAsync(config, callbacks);
 ```
@@ -88,6 +110,8 @@ await MyNet.Room.KickAsync(config, callbacks);
 - `JoinByCodeAsync(...)`: `Code`가 비어 있으면 `EmptyCode`
 - `JoinByIdAsync(...)`, `LeaveAsync(...)`, `KickAsync(...)`, `Room.UpdateAsync(...)`: `RoomId`가 비어 있으면 `EmptyRoomId`
 - `Player.UpdateAsync(...)`: `PlayerId`가 비어 있으면 `EmptyPlayerId`
+
+`LeaveAsync(...)`는 현재 플레이어 자신의 퇴장에 사용하고, 다른 플레이어 ID를 넣으면 `NotPermitted`로 실패합니다.
 
 ## 방 정보 수정
 
