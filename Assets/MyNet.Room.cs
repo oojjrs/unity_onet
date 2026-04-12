@@ -329,6 +329,28 @@ namespace oojjrs.onet
                     _updater = default;
                 }
             }
+
+            public static async Task UpdateAsync(UpdateConfigInterface config, Action<MyNetRoomInterface> onOk = default, Action onBusy = default, Action onFailed = default, Action<MyNetSessionException> onException = default)
+            {
+                await RunBusyOperationAsync(async () =>
+                {
+                    if (MultiplayerService.Instance.Sessions.TryGetValue(config.RoomId, out var session))
+                    {
+                        session.AsHost().IsPrivate = config.IsPrivate;
+                        session.AsHost().SetProperties(MyNet.ToSessionProperties(config.RoomFields));
+
+                        await session.AsHost().SavePropertiesAsync();
+
+                        onOk?.Invoke(MyNet.Room.GetOrCreate(session));
+                    }
+                    else
+                    {
+                        onFailed?.Invoke();
+                    }
+
+
+                }, onBusy, onException);
+            }
         }
     }
 }
