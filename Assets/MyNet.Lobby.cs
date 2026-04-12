@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Unity.Services.Multiplayer;
 using UnityEngine;
 
@@ -16,8 +18,11 @@ namespace oojjrs.onet
                 int PollingDelaySeconds { get; }
             }
 
+            private static bool _isBusy;
             private static readonly Dictionary<string, InternalRoomSessionStub> _rooms = new();
+            private static CancellationTokenSource _stopCancellationTokenSource;
             private static GameObject _updater;
+            private static TaskCompletionSource<bool> _updateRequestedTcs;
 
             internal static MyNetRoomInterface GetOrCreate(ISessionInfo session)
             {
@@ -46,13 +51,36 @@ namespace oojjrs.onet
                     var c = _updater.GetComponent<InternalLobbyUpdater>();
                     if (c != default)
                         c.UpdateRequested = true;
+                }
 
-                    var cc = _updater.GetComponent<InternalLobbyUpdaterSession>();
-                    if (cc != default)
-                        cc.UpdateRequested = true;
+                _updateRequestedTcs?.TrySetResult(true);
+            }
+
+            private static async Task RunBusyOperationAsync(Func<Task> operation, MyNetCallbacksInterface callbacks)
+            {
+                if (_isBusy)
+                {
+                    callbacks?.OnBusy();
+                    return;
+                }
+
+                _isBusy = true;
+
+                try
+                {
+                    await operation();
+                }
+                catch (SessionException e)
+                {
+                    callbacks?.OnException(MyNet.ToException(e));
+                }
+                finally
+                {
+                    _isBusy = false;
                 }
             }
 
+            [Obsolete("Use UpdateAsync instead.")]
             public static void StartUpdate(float updateIntervalSeconds = 5, Action<IEnumerable<MyNetRoomInterface>> onUpdate = default, Action<MyNetException> onException = default)
             {
                 StopUpdate();
@@ -60,20 +88,6 @@ namespace oojjrs.onet
                 var go = new GameObject(nameof(InternalLobbyUpdater), typeof(InternalLobbyUpdater));
                 var c = go.GetComponent<InternalLobbyUpdater>();
                 c.UpdateIntervalSeconds = updateIntervalSeconds;
-
-                c.OnException += onException;
-                c.OnUpdate += onUpdate;
-
-                _updater = go;
-            }
-
-            public static void StartUpdate(UpdateConfigInterface config, Action<IEnumerable<MyNetRoomInterface>> onUpdate = default, Action<MyNetSessionException> onException = default)
-            {
-                StopUpdate();
-
-                var go = new GameObject(nameof(InternalLobbyUpdaterSession), typeof(InternalLobbyUpdaterSession));
-                var c = go.GetComponent<InternalLobbyUpdaterSession>();
-                c.Config = config;
 
                 c.OnException += onException;
                 c.OnUpdate += onUpdate;
@@ -89,6 +103,45 @@ namespace oojjrs.onet
 
                     _updater = default;
                 }
+
+                _stopCancellationTokenSource?.Cancel();
+            }
+
+            public static async Task UpdateAsync(UpdateConfigInterface config, MyNetLobbyCallbacksInterface callbacks)
+            {
+                await RunBusyOperationAsync(async () =>
+                {
+                    _stopCancellationTokenSource = new();
+                    _updateRequestedTcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+                    var lcts = CancellationTokenSource.CreateLinkedTokenSource(config.CancellationToken, _stopCancellationTokenSource.Token);
+                    while (lcts.IsCancellationRequested == false)
+                    {
+                        try
+                        {
+                            var results = await MultiplayerService.Instance.QuerySessionsAsync(new()
+                            {
+                            });
+
+                            if (lcts.IsCancellationRequested)
+                                break;
+
+                            callbacks?.OnOk(results.Sessions.Select(session => MyNet.Lobby.GetOrCreate(session)));
+                        }
+                        catch (SessionException e)
+                        {
+                            callbacks?.OnException(MyNet.ToException(e));
+                        }
+
+                        var delayTask = Task.Delay(TimeSpan.FromSeconds(config.PollingDelaySeconds), lcts.Token);
+                        var completedTask = await Task.WhenAny(delayTask, _updateRequestedTcs.Task);
+                        if (completedTask == _updateRequestedTcs.Task)
+                            _updateRequestedTcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
+                    }
+
+                    _stopCancellationTokenSource = default;
+                    _updateRequestedTcs = default;
+                }, callbacks);
             }
         }
     }
