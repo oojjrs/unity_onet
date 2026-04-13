@@ -38,6 +38,14 @@ public interface MyNetCallbacksInterface
 }
 ```
 
+현재 `FailureEnum`에는 아래 항목이 있습니다.
+
+- `EmptyCode`
+- `EmptyPlayerId`
+- `EmptyRoomId`
+- `NotFoundRoom`
+- `NotPermitted`
+
 ## 사용 예시
 
 ```csharp
@@ -68,6 +76,28 @@ var config = new LobbyUpdateConfig
 await MyNet.Lobby.UpdateAsync(config, callbacks);
 ```
 
+`OnOk(...)`로 전달되는 항목은 `MyNetRoomInterface`이며 현재 아래 정보를 읽을 수 있습니다.
+
+```csharp
+public interface MyNetRoomInterface
+{
+    string Code { get; }
+    bool HasPassword { get; }
+    MyNetPlayerInterface Host { get; }
+    string HostId { get; }
+    string Id { get; }
+    bool IsLocked { get; }
+    bool IsPrivate { get; }
+    int PlayerCount { get; }
+    int PlayerCountAvailable { get; }
+    int PlayerCountMax { get; }
+    IEnumerable<MyNetPlayerInterface> Players { get; }
+    string Title { get; }
+
+    string GetData(string key);
+}
+```
+
 ## 수동 갱신과 중지
 
 ```csharp
@@ -81,5 +111,7 @@ MyNet.Lobby.StopUpdate();
 ## 동작 메모
 
 - `UpdateAsync(...)`는 시작 직후 한 번 조회하고, 이후 `PollingDelaySeconds` 간격으로 반복 조회합니다.
+- `RequestUpdate()`는 내부 대기 상태를 깨워 다음 주기를 기다리지 않고 다시 조회하게 합니다.
+- 이미 다른 `UpdateAsync(...)` 호출이 실행 중이면 새 호출은 `OnBusy()`로 정리됩니다.
 - 세션 조회가 이미 진행 중일 때 `StopUpdate()`가 호출되면, 진행 중인 `QuerySessionsAsync()` 자체를 중간 취소하지는 못합니다. 대신 조회가 끝난 뒤 결과 콜백을 건너뛰고 종료합니다.
 - Unity Services 초기화 이후에 사용하는 전제를 갖습니다.

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.6.10
+
+- 세션 기반 `Lobby`, `Room`, `Player` 비동기 API의 현재 동작과 입력 조건을 문서에 반영했습니다.
+- `MyNetRoomInterface`, `MyNetPlayerInterface`, 공통 콜백 인터페이스의 노출 표면을 문서에 정리했습니다.
+- 패키지 README와 패키지 문서 인덱스를 현재 구현 범위 기준으로 갱신했습니다.
+- 패킷 처리 흐름을 큐 polling 예시 대신 `OnReceived`, `OnFinishThisHandling` 이벤트 기준으로 정리했습니다.
+
 ## 1.6.9
 
 - 세션 프로퍼티 업데이트 API를 추가했습니다.

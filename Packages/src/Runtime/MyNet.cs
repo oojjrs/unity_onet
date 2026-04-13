@@ -31,6 +31,7 @@ namespace oojjrs.onet
             public VisibilityEnum visibility;
         }
 
+        public static bool IsDebugging { get; set; }
         internal const string PlayerPropertyNickname = "__Nickname__";
         private static GameObject _transportObject;
 

@@ -30,28 +30,40 @@ transport 계층은 이 두 영역 사이에서 패킷을 이동시키는 역할
 
 ### 클라이언트 측
 
+응답 수신 이벤트 등록:
+
+```csharp
+MyNet.Packets.Client.OnReceived += response =>
+{
+    // 응답 처리
+};
+```
+
+요청 보내기:
+
 ```csharp
 MyNet.Packets.Client.Send(request);
 ```
 
-```csharp
-if (MyNet.Packets.Client.TryDequeue(out MyNetResponse response))
-{
-    // 응답 처리
-}
-```
-
 ### 서버 측
 
-```csharp
-if (MyNet.Packets.Server.TryDequeue(out MyNetRequest request))
-{
-    // 요청 처리
-}
-```
+요청 수신 이벤트 등록:
 
 ```csharp
-MyNet.Packets.Server.Send(response);
+MyNet.Packets.Server.OnReceived += request =>
+{
+    // 요청 처리
+    MyNet.Packets.Server.Send(response);
+};
+```
+
+`Loopback` transport는 매 프레임 서버 응답을 먼저 클라이언트로 옮기고, 그 다음 클라이언트 요청을 서버로 옮긴 뒤 각 측의 수신 이벤트를 호출합니다.
+
+필요하면 프레임 단위 처리 종료 시점에 아래 이벤트를 사용할 수 있습니다.
+
+```csharp
+MyNet.Packets.Client.OnFinishThisHandling += () => { };
+MyNet.Packets.Server.OnFinishThisHandling += () => { };
 ```
 
 ## Transport 선택

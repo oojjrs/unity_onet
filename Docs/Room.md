@@ -82,9 +82,26 @@ await MyNet.Room.CreateAsync(config, callbacks);
 방 코드를 알고 있을 때는 `JoinByCodeAsync(...)`, 방 ID를 알고 있을 때는 `JoinByIdAsync(...)`를 사용합니다.
 
 ```csharp
+class JoinConfig : MyNet.Room.JoinConfigInterface
+{
+    public string Account { get; init; }
+    public CancellationToken CancellationToken { get; init; }
+    public string Code { get; init; }
+    public string Password { get; init; }
+    public IEnumerable<MyNet.Field> PlayerFields { get; init; }
+    public string PlayerNickname { get; init; }
+    public string RoomId { get; init; }
+}
+```
+
+```csharp
 await MyNet.Room.JoinByCodeAsync(config, callbacks);
 await MyNet.Room.JoinByIdAsync(config, callbacks);
 ```
+
+- `JoinByCodeAsync(...)`는 현재 `Code`, `PlayerFields`, `PlayerNickname`을 사용합니다.
+- `JoinByIdAsync(...)`는 현재 `RoomId`, `Password`, `PlayerFields`, `PlayerNickname`을 사용합니다.
+- `JoinConfigInterface`의 `Account`는 현재 구현에서 사용하지 않습니다.
 
 ## 방 퇴장과 추방
 
@@ -112,6 +129,7 @@ await MyNet.Room.KickAsync(config, callbacks);
 - `Player.UpdateAsync(...)`: `PlayerId`가 비어 있으면 `EmptyPlayerId`
 
 `LeaveAsync(...)`는 현재 플레이어 자신의 퇴장에 사용하고, 다른 플레이어 ID를 넣으면 `NotPermitted`로 실패합니다.
+`KickAsync(...)`는 busy 상태와 무관하게 여러 번 호출될 수 있도록 별도로 처리됩니다.
 
 ## 방 정보 수정
 
@@ -127,7 +145,40 @@ class UpdateRoomConfig : MyNet.Room.UpdateConfigInterface
 await MyNet.Room.UpdateAsync(config, callbacks);
 ```
 
-현재 세션에서 호스트 권한이 필요한 작업입니다.
+현재 구현은 세션 호스트가 `IsPrivate`와 세션 프로퍼티를 함께 저장하는 흐름입니다.
+
+## 방/플레이어 조회 표면
+
+성공 콜백으로 받는 `MyNetRoomInterface`와 `MyNetPlayerInterface`는 현재 아래 멤버를 제공합니다.
+
+```csharp
+public interface MyNetRoomInterface
+{
+    string Code { get; }
+    bool HasPassword { get; }
+    MyNetPlayerInterface Host { get; }
+    string HostId { get; }
+    string Id { get; }
+    bool IsLocked { get; }
+    bool IsPrivate { get; }
+    int PlayerCount { get; }
+    int PlayerCountAvailable { get; }
+    int PlayerCountMax { get; }
+    IEnumerable<MyNetPlayerInterface> Players { get; }
+    string Title { get; }
+
+    string GetData(string key);
+}
+
+public interface MyNetPlayerInterface
+{
+    string Id { get; }
+    bool IsHost { get; }
+    string Nickname { get; }
+
+    string GetData(string key);
+}
+```
 
 ## 플레이어 속성 수정
 
