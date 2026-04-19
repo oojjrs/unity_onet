@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.6.11
+
+- `MyNetAuthenticator`가 콜백 없이도 경고만 남기고 안전하게 종료되도록 정리했습니다.
+- 애플리케이션 종료 중에는 `MyNetAuthenticator`가 자신을 파괴하지 않도록 정리했습니다.
+
 ## 1.6.10
 
 - 세션 기반 `Lobby`, `Room`, `Player` 비동기 API의 현재 동작과 입력 조건을 문서에 반영했습니다.

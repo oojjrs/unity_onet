@@ -20,11 +20,19 @@ namespace oojjrs.onet
             void OnError(MyNetRequestFailedException e);
         }
 
+        private bool _isQuitting = false;
+
+        private void OnApplicationQuit()
+        {
+            _isQuitting = true;
+        }
+
         private async void Start()
         {
             await RunAsync();
 
-            Destroy(gameObject);
+            if (_isQuitting == false)
+                Destroy(gameObject);
         }
 
         private Task RunAsync()
@@ -39,7 +47,6 @@ namespace oojjrs.onet
             {
                 // 경고 로깅을 이상하게 해야되네 -.-
                 logger.Log(LogType.Warning, $"{name}> DON'T HAVE CALLBACK FUNCTION.");
-                return;
             }
 
             try
@@ -63,24 +70,24 @@ namespace oojjrs.onet
                 if (IsAlive() == false)
                     return;
 
-                callback.OnAuthenticated(AuthenticationService.Instance.PlayerId, playerName);
+                callback?.OnAuthenticated(AuthenticationService.Instance.PlayerId, playerName);
             }
             catch (AuthenticationException e)
             {
-                callback.OnError(MyNet.ToException(e));
+                callback?.OnError(MyNet.ToException(e));
             }
             catch (OperationCanceledException e)
             {
-                callback.OnError(e);
+                callback?.OnError(e);
             }
             catch (RequestFailedException e)
             {
-                callback.OnError(MyNet.ToException(e));
+                callback?.OnError(MyNet.ToException(e));
             }
 
             bool IsAlive()
             {
-                return (this != default) && (callback.CancellationToken.IsCancellationRequested == false);
+                return (this != default) && (callback?.CancellationToken.IsCancellationRequested == false);
             }
         }
     }
