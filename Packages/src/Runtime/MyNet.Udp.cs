@@ -34,7 +34,7 @@ namespace oojjrs.onet
                 }
                 else
                 {
-                    result = default;
+                    result = null;
                     return false;
                 }
             }

@@ -19,11 +19,11 @@ namespace oojjrs.onet
             var reader = new BinaryReader(stream);
             var name = reader.ReadString();
             if (string.IsNullOrWhiteSpace(name))
-                return default;
+                return null;
 
             var type = Type.GetType(name);
             if (type is null)
-                return default;
+                return null;
 
             return ReadClass(reader, type, GetProperties(type));
         }

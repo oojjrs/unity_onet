@@ -27,7 +27,7 @@ namespace oojjrs.onet
             internal static MyNetRoomInterface GetOrCreate(ISessionInfo session)
             {
                 if (session is null)
-                    return default;
+                    return null;
 
                 if (_rooms.TryGetValue(session.Id, out var value))
                 {
@@ -81,7 +81,7 @@ namespace oojjrs.onet
             }
 
             [Obsolete("Use UpdateAsync instead.")]
-            public static void StartUpdate(float updateIntervalSeconds = 5, Action<IEnumerable<MyNetRoomInterface>> onUpdate = default, Action<MyNetException> onException = default)
+            public static void StartUpdate(float updateIntervalSeconds = 5, Action<IEnumerable<MyNetRoomInterface>> onUpdate = null, Action<MyNetException> onException = null)
             {
                 StopUpdate();
 
@@ -101,7 +101,7 @@ namespace oojjrs.onet
                 {
                     UnityEngine.Object.Destroy(_updater);
 
-                    _updater = default;
+                    _updater = null;
                 }
 
                 _stopCancellationTokenSource?.Cancel();
@@ -139,8 +139,8 @@ namespace oojjrs.onet
                             _updateRequestedTcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
                     }
 
-                    _stopCancellationTokenSource = default;
-                    _updateRequestedTcs = default;
+                    _stopCancellationTokenSource = null;
+                    _updateRequestedTcs = null;
                 }, callbacks);
             }
         }

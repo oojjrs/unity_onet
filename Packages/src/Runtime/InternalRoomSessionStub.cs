@@ -8,7 +8,7 @@ namespace oojjrs.onet
     {
         string MyNetRoomInterface.Code => string.Empty;
         bool MyNetRoomInterface.HasPassword => Session.HasPassword;
-        MyNetPlayerInterface MyNetRoomInterface.Host => default;
+        MyNetPlayerInterface MyNetRoomInterface.Host => null;
         string MyNetRoomInterface.HostId => Session.HostId;
         string MyNetRoomInterface.Id => Session.Id;
         bool MyNetRoomInterface.IsLocked => Session.IsLocked;

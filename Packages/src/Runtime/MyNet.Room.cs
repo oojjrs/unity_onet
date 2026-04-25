@@ -86,7 +86,7 @@ namespace oojjrs.onet
             internal static MyNetRoomInterface GetOrCreate(Unity.Services.Lobbies.Models.Lobby lobby)
             {
                 if (lobby is null)
-                    return default;
+                    return null;
 
                 if (_unityRooms.TryGetValue(lobby, out var value))
                     return value;
@@ -99,7 +99,7 @@ namespace oojjrs.onet
             internal static MyNetRoomInterface GetOrCreate(ISession session)
             {
                 if (session is null)
-                    return default;
+                    return null;
 
                 if (_sessionRooms.TryGetValue(session.Id, out var value))
                 {
@@ -252,7 +252,7 @@ namespace oojjrs.onet
             }
 
             [Obsolete("Use CreateAsync instead.")]
-            public static void StartCreate(CreateConfigInterface config, Action<MyNetRoomInterface> onOk = default, Action onFailed = default, Action<MyNetException> onException = default)
+            public static void StartCreate(CreateConfigInterface config, Action<MyNetRoomInterface> onOk = null, Action onFailed = null, Action<MyNetException> onException = null)
             {
                 StopCreate();
 
@@ -269,7 +269,7 @@ namespace oojjrs.onet
 
             // 이 로직은 추방에도 사용되므로 여러 번 들어올 수 있다.
             [Obsolete("Use LeaveAsync or KickAsync instead.")]
-            public static void StartExit(ExitConfigInterface config, Action<string, string> onOk = default, Action<MyNetException> onException = default)
+            public static void StartExit(ExitConfigInterface config, Action<string, string> onOk = null, Action<MyNetException> onException = null)
             {
                 var go = new GameObject(nameof(InternalRoomExiter), typeof(InternalRoomExiter));
                 var c = go.GetComponent<InternalRoomExiter>();
@@ -292,7 +292,7 @@ namespace oojjrs.onet
             }
 
             [Obsolete("Use JoinByCodeAsync or JoinByIdAsync instead.")]
-            public static void StartJoin(JoinConfigInterface config, Action<MyNetRoomInterface> onOk = default, Action onFailed = default, Action<MyNetException> onException = default)
+            public static void StartJoin(JoinConfigInterface config, Action<MyNetRoomInterface> onOk = null, Action onFailed = null, Action<MyNetException> onException = null)
             {
                 StopJoin();
 
@@ -308,7 +308,7 @@ namespace oojjrs.onet
             }
 
             [Obsolete("Use UpdateAsync instead.")]
-            public static void StartUpdate(UpdateConfigInterface config, Action<MyNetRoomInterface> onOk = default, Action onFailed = default, Action<MyNetException> onException = default)
+            public static void StartUpdate(UpdateConfigInterface config, Action<MyNetRoomInterface> onOk = null, Action onFailed = null, Action<MyNetException> onException = null)
             {
                 StopUpdate();
 
@@ -329,7 +329,7 @@ namespace oojjrs.onet
                 {
                     UnityEngine.Object.Destroy(_creator);
 
-                    _creator = default;
+                    _creator = null;
                 }
             }
 
@@ -340,7 +340,7 @@ namespace oojjrs.onet
                 {
                     UnityEngine.Object.Destroy(_heartbeat);
 
-                    _heartbeat = default;
+                    _heartbeat = null;
                 }
             }
 
@@ -350,7 +350,7 @@ namespace oojjrs.onet
                 {
                     UnityEngine.Object.Destroy(_joiner);
 
-                    _joiner = default;
+                    _joiner = null;
                 }
             }
 
@@ -360,7 +360,7 @@ namespace oojjrs.onet
                 {
                     UnityEngine.Object.Destroy(_updater);
 
-                    _updater = default;
+                    _updater = null;
                 }
             }
 

@@ -42,17 +42,17 @@ namespace oojjrs.onet
                     {
                         for (int i = 0; i < RetryCount; ++i)
                         {
-                            PendingRequest = default;
+                            PendingRequest = null;
 
                             CurrentRequester = MyNet.Packets.CreateNew(request, new("https://ThisIsNotWorking"));
                             CurrentRequester.OnError += () =>
                             {
-                                CurrentRequester = default;
+                                CurrentRequester = null;
                                 PendingRequest = request;
                             };
                             CurrentRequester.OnReceived += stream =>
                             {
-                                CurrentRequester = default;
+                                CurrentRequester = null;
                             };
                             //CurrentRequester.OnUnauthorized += () =>
                             //{

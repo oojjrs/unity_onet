@@ -39,7 +39,7 @@ namespace oojjrs.onet
             internal static MyNetPlayerInterface GetOrCreate(Unity.Services.Lobbies.Models.Player player, Func<InternalPlayerUnity> onFallback)
             {
                 if (player is null)
-                    return default;
+                    return null;
 
                 if (_unityPlayers.TryGetValue(player, out var value))
                     return value;
@@ -52,7 +52,7 @@ namespace oojjrs.onet
             internal static MyNetPlayerInterface GetOrCreate(IReadOnlyPlayer player, Func<InternalPlayerSession> onFallback)
             {
                 if (player is null)
-                    return default;
+                    return null;
 
                 if (_sessionPlayers.TryGetValue(player.Id, out var value))
                 {
@@ -92,7 +92,7 @@ namespace oojjrs.onet
             }
 
             [Obsolete("Use UpdateAsync instead.")]
-            public static void StartUpdate(UpdateConfigInterface config, Action<MyNetRoomInterface> onOk = default, Action onFailed = default, Action<MyNetException> onException = default)
+            public static void StartUpdate(UpdateConfigInterface config, Action<MyNetRoomInterface> onOk = null, Action onFailed = null, Action<MyNetException> onException = null)
             {
                 var go = new GameObject(nameof(InternalPlayerUpdater), typeof(InternalPlayerUpdater));
                 var c = go.GetComponent<InternalPlayerUpdater>();

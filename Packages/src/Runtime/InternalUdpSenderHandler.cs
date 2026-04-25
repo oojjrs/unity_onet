@@ -45,7 +45,7 @@ namespace oojjrs.onet
                     if (PendingPacket is not null)
                     {
                         bytes = PendingPacket;
-                        PendingPacket = default;
+                        PendingPacket = null;
                     }
                     else
                     {
@@ -66,9 +66,9 @@ namespace oojjrs.onet
                                 Debug.LogWarning($"UDP SEND ERROR> {CurrentSender.name}");
 
                                 PendingPacket = bytes;
-                                CurrentSender = default;
+                                CurrentSender = null;
                             };
-                            CurrentSender.OnSent += () => CurrentSender = default;
+                            CurrentSender.OnSent += () => CurrentSender = null;
 
                             yield return new WaitUntil(() => CurrentSender == null);
 
