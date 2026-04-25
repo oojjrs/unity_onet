@@ -88,7 +88,7 @@ namespace oojjrs.onet
 
             bool IsAlive()
             {
-                return (this != null) && ((callbackObject == null) || (callback.CancellationToken.IsCancellationRequested == false));
+                return (this != null) && (callbackObject != null) && (callback.CancellationToken.IsCancellationRequested == false);
             }
         }
     }
