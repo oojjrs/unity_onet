@@ -37,13 +37,14 @@ namespace oojjrs.onet
 
         private Task RunAsync()
         {
-            return RunAsync(GetComponent<CallbackInterface>());
+            var callback = GetComponent<CallbackInterface>();
+            return RunAsync(callback, callback as UnityEngine.Object);
         }
 
-        private async Task RunAsync(CallbackInterface callback)
+        private async Task RunAsync(CallbackInterface callback, UnityEngine.Object callbackObject)
         {
-            var logger = callback?.Logger ?? Debug.unityLogger;
-            if (callback is null)
+            var logger = callbackObject != null ? callback.Logger : Debug.unityLogger;
+            if (callbackObject == null)
             {
                 // 경고 로깅을 이상하게 해야되네 -.-
                 logger.Log(LogType.Warning, $"{name}> DON'T HAVE CALLBACK FUNCTION.");
@@ -87,7 +88,7 @@ namespace oojjrs.onet
 
             bool IsAlive()
             {
-                return (this != null) && (callback?.CancellationToken.IsCancellationRequested == false);
+                return (this != null) && ((callbackObject == null) || (callback.CancellationToken.IsCancellationRequested == false));
             }
         }
     }
