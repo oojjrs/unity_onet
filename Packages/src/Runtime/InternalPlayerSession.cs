@@ -1,4 +1,4 @@
-﻿using Unity.Services.Multiplayer;
+using Unity.Services.Multiplayer;
 
 namespace oojjrs.onet
 {
@@ -21,7 +21,7 @@ namespace oojjrs.onet
 
         string MyNetPlayerInterface.GetData(string key)
         {
-            if (Player.Properties == default)
+            if (Player.Properties is null)
                 return string.Empty;
 
             if (Player.Properties.TryGetValue(key, out var value))

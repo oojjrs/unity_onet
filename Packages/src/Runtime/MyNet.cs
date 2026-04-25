@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
@@ -37,7 +37,7 @@ namespace oojjrs.onet
 
         public static void SetTransport(TransportKindEnum e)
         {
-            if (_transportObject != default)
+            if (_transportObject != null)
                 Object.DestroyImmediate(_transportObject);
 
             switch (e)

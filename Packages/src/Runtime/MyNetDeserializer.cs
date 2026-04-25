@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -22,7 +22,7 @@ namespace oojjrs.onet
                 return default;
 
             var type = Type.GetType(name);
-            if (type == default)
+            if (type is null)
                 return default;
 
             return ReadClass(reader, type, GetProperties(type));

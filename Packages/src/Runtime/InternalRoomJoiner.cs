@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Unity.Services.Lobbies;
 using UnityEngine;
 
@@ -25,9 +25,9 @@ namespace oojjrs.onet
                 {
                     Player = new(id: Config.Account, data: MyNet.ToPlayerData(Config.PlayerFields, Config.PlayerNickname)),
                 });
-                if (this != default)
+                if (this != null)
                 {
-                    if (lobby != default)
+                    if (lobby is not null)
                         OnOk?.Invoke(MyNet.Room.GetOrCreate(lobby));
                     else
                         OnFailed?.Invoke();
@@ -39,7 +39,7 @@ namespace oojjrs.onet
             }
             finally
             {
-                if (this != default)
+                if (this != null)
                     MyNet.Room.StopJoin();
             }
         }

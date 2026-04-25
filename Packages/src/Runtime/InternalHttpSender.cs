@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -96,7 +96,7 @@ namespace oojjrs.onet
             if (IsAlive())
                 Destroy(gameObject);
 
-            bool IsAlive() => (this != default) && (_isQuitting == false);
+            bool IsAlive() => (this != null) && (_isQuitting == false);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -26,7 +26,7 @@ namespace oojjrs.onet
 
             internal static MyNetRoomInterface GetOrCreate(ISessionInfo session)
             {
-                if (session == default)
+                if (session is null)
                     return default;
 
                 if (_rooms.TryGetValue(session.Id, out var value))
@@ -46,10 +46,10 @@ namespace oojjrs.onet
 
             public static void RequestUpdate()
             {
-                if (_updater != default)
+                if (_updater != null)
                 {
                     var c = _updater.GetComponent<InternalLobbyUpdater>();
-                    if (c != default)
+                    if (c != null)
                         c.UpdateRequested = true;
                 }
 
@@ -97,7 +97,7 @@ namespace oojjrs.onet
 
             public static void StopUpdate()
             {
-                if (_updater != default)
+                if (_updater != null)
                 {
                     UnityEngine.Object.Destroy(_updater);
 

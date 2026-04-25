@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Unity.Services.Lobbies;
 using UnityEngine;
 
@@ -22,7 +22,7 @@ namespace oojjrs.onet
             {
                 await LobbyService.Instance.RemovePlayerAsync(Config.RoomId, Config.PlayerId);
 
-                if (this != default)
+                if (this != null)
                     OnOk?.Invoke(Config.RoomId, Config.PlayerId);
             }
             catch (LobbyServiceException e)
@@ -31,7 +31,7 @@ namespace oojjrs.onet
             }
             finally
             {
-                if (this != default)
+                if (this != null)
                     Destroy(gameObject);
             }
         }

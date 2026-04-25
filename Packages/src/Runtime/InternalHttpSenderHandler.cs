@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
 
 namespace oojjrs.onet
@@ -33,12 +33,12 @@ namespace oojjrs.onet
                         break;
 
                     MyNetRequest request;
-                    if (PendingRequest != default)
+                    if (PendingRequest is not null)
                         request = PendingRequest;
                     else
                         MyNet.Packets.Client.TryDequeue(out request);
 
-                    if (request != default)
+                    if (request is not null)
                     {
                         for (int i = 0; i < RetryCount; ++i)
                         {
@@ -67,9 +67,9 @@ namespace oojjrs.onet
                             //        Hub.Web.Send(r);
                             //};
 
-                            yield return new WaitUntil(() => CurrentRequester == default);
+                            yield return new WaitUntil(() => CurrentRequester == null);
 
-                            if (PendingRequest != default)
+                            if (PendingRequest is not null)
                                 yield return new WaitForSeconds(ResendCooldownTimeSeconds);
                             else
                                 break;
@@ -77,7 +77,7 @@ namespace oojjrs.onet
                     }
 
                     // 뭔가 네트워크 에러가 있을 것이므로 한참 기다린다.
-                    if (PendingRequest != default)
+                    if (PendingRequest is not null)
                         yield return new WaitForSeconds(NetworkCooldownTimeSeconds);
                 }
 
@@ -91,10 +91,10 @@ namespace oojjrs.onet
                     {
                         // TODO: 더 이상 여기서 토큰 체크를 하지 않는다. 일단 이걸 쓸건지부터가...
                         //var request = PendingRequest;
-                        //if (request == default)
+                        //if (request is null)
                         //    Hub.Web.Requests.TryPeek(out request);
 
-                        //if (request != default)
+                        //if (request is not null)
                         //{
                         //    // 다음 요청은 토큰을 필요로 하지 않는 패킷들이다.
                         //    if (request is UserLogin or UserRefresh)

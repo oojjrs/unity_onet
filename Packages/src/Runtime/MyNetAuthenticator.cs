@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Unity.Services.Authentication;
@@ -43,7 +43,7 @@ namespace oojjrs.onet
         private async Task RunAsync(CallbackInterface callback)
         {
             var logger = callback?.Logger ?? Debug.unityLogger;
-            if (callback == default)
+            if (callback is null)
             {
                 // 경고 로깅을 이상하게 해야되네 -.-
                 logger.Log(LogType.Warning, $"{name}> DON'T HAVE CALLBACK FUNCTION.");
@@ -87,7 +87,7 @@ namespace oojjrs.onet
 
             bool IsAlive()
             {
-                return (this != default) && (callback?.CancellationToken.IsCancellationRequested == false);
+                return (this != null) && (callback?.CancellationToken.IsCancellationRequested == false);
             }
         }
     }

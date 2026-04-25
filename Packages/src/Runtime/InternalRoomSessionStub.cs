@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Unity.Services.Multiplayer;
 
@@ -23,7 +23,7 @@ namespace oojjrs.onet
 
         string MyNetRoomInterface.GetData(string key)
         {
-            if (Session.Properties == default)
+            if (Session.Properties is null)
                 return string.Empty;
 
             if (Session.Properties.TryGetValue(key, out var value))

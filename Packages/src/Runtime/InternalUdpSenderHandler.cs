@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Net;
 using UnityEngine;
 
@@ -36,13 +36,13 @@ namespace oojjrs.onet
 
                 while (true)
                 {
-                    yield return new WaitUntil(() => (PendingPacket != default) || MyNet.Udp.Has(RemoteEndPoint));
+                    yield return new WaitUntil(() => (PendingPacket is not null) || MyNet.Udp.Has(RemoteEndPoint));
 
                     if (_isQuitting)
                         break;
 
                     byte[] bytes;
-                    if (PendingPacket != default)
+                    if (PendingPacket is not null)
                     {
                         bytes = PendingPacket;
                         PendingPacket = default;
@@ -52,7 +52,7 @@ namespace oojjrs.onet
                         MyNet.Udp.TryDequeue(RemoteEndPoint, out bytes);
                     }
 
-                    if (bytes != default)
+                    if (bytes is not null)
                     {
                         for (int i = 0; i < RetryCount; ++i)
                         {
@@ -70,14 +70,14 @@ namespace oojjrs.onet
                             };
                             CurrentSender.OnSent += () => CurrentSender = default;
 
-                            yield return new WaitUntil(() => CurrentSender == default);
+                            yield return new WaitUntil(() => CurrentSender == null);
 
-                            if (PendingPacket == default)
+                            if (PendingPacket is null)
                                 break;
                         }
                     }
 
-                    if (PendingPacket != default)
+                    if (PendingPacket is not null)
                         yield return new WaitForSeconds(NetworkCooldownTimeSeconds);
                 }
 

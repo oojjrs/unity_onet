@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Unity.Services.Authentication;
 using Unity.Services.Lobbies;
 using UnityEngine;
@@ -29,12 +29,12 @@ namespace oojjrs.onet
                 try
                 {
                     var ids = await LobbyService.Instance.GetJoinedLobbiesAsync();
-                    if (this != default)
+                    if (this != null)
                     {
                         foreach (var id in ids)
                         {
                             var lobby = await LobbyService.Instance.GetLobbyAsync(id);
-                            if (this != default)
+                            if (this != null)
                             {
                                 if (lobby.HostId == AuthenticationService.Instance.PlayerId)
                                 {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -75,7 +75,7 @@ namespace oojjrs.onet
 
                     if (config.CancellationToken.IsCancellationRequested == false)
                     {
-                        if (session != default)
+                        if (session is not null)
                             callbacks?.OnOk(MyNet.Room.GetOrCreate(session));
                         else
                             callbacks?.OnFailed(MyNetCallbacksInterface.FailureEnum.NotFoundRoom);
@@ -85,7 +85,7 @@ namespace oojjrs.onet
 
             internal static MyNetRoomInterface GetOrCreate(Unity.Services.Lobbies.Models.Lobby lobby)
             {
-                if (lobby == default)
+                if (lobby is null)
                     return default;
 
                 if (_unityRooms.TryGetValue(lobby, out var value))
@@ -98,7 +98,7 @@ namespace oojjrs.onet
 
             internal static MyNetRoomInterface GetOrCreate(ISession session)
             {
-                if (session == default)
+                if (session is null)
                     return default;
 
                 if (_sessionRooms.TryGetValue(session.Id, out var value))
@@ -133,7 +133,7 @@ namespace oojjrs.onet
 
                     if (config.CancellationToken.IsCancellationRequested == false)
                     {
-                        if (session != default)
+                        if (session is not null)
                             callbacks?.OnOk(MyNet.Room.GetOrCreate(session));
                         else
                             callbacks?.OnFailed(MyNetCallbacksInterface.FailureEnum.NotFoundRoom);
@@ -159,7 +159,7 @@ namespace oojjrs.onet
 
                     if (config.CancellationToken.IsCancellationRequested == false)
                     {
-                        if (session != default)
+                        if (session is not null)
                             callbacks?.OnOk(MyNet.Room.GetOrCreate(session));
                         else
                             callbacks?.OnFailed(MyNetCallbacksInterface.FailureEnum.NotFoundRoom);
@@ -325,7 +325,7 @@ namespace oojjrs.onet
 
             public static void StopCreate()
             {
-                if (_creator != default)
+                if (_creator != null)
                 {
                     UnityEngine.Object.Destroy(_creator);
 
@@ -336,7 +336,7 @@ namespace oojjrs.onet
             [Obsolete("Don't use anymore")]
             public static void StopHeartbeat()
             {
-                if (_heartbeat != default)
+                if (_heartbeat != null)
                 {
                     UnityEngine.Object.Destroy(_heartbeat);
 
@@ -346,7 +346,7 @@ namespace oojjrs.onet
 
             public static void StopJoin()
             {
-                if (_joiner != default)
+                if (_joiner != null)
                 {
                     UnityEngine.Object.Destroy(_joiner);
 
@@ -356,7 +356,7 @@ namespace oojjrs.onet
 
             public static void StopUpdate()
             {
-                if (_updater != default)
+                if (_updater != null)
                 {
                     UnityEngine.Object.Destroy(_updater);
 

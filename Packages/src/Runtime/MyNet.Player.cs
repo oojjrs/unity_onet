@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -38,7 +38,7 @@ namespace oojjrs.onet
 
             internal static MyNetPlayerInterface GetOrCreate(Unity.Services.Lobbies.Models.Player player, Func<InternalPlayerUnity> onFallback)
             {
-                if (player == default)
+                if (player is null)
                     return default;
 
                 if (_unityPlayers.TryGetValue(player, out var value))
@@ -51,7 +51,7 @@ namespace oojjrs.onet
 
             internal static MyNetPlayerInterface GetOrCreate(IReadOnlyPlayer player, Func<InternalPlayerSession> onFallback)
             {
-                if (player == default)
+                if (player is null)
                     return default;
 
                 if (_sessionPlayers.TryGetValue(player.Id, out var value))

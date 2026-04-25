@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -64,7 +64,7 @@ namespace oojjrs.onet
             foreach (var prop in props)
             {
                 var propValue = prop.GetValue(value);
-                var isExist = propValue != null;
+                var isExist = propValue is not null;
                 bw.Write(isExist);
 
                 if (isExist == false)

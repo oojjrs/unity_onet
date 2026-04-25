@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Services.Lobbies;
@@ -29,7 +29,7 @@ namespace oojjrs.onet
                 try
                 {
                     var response = await LobbyService.Instance.QueryLobbiesAsync();
-                    if (this != default)
+                    if (this != null)
                         OnUpdate?.Invoke(response.Results.Select(lobby => MyNet.Room.GetOrCreate(lobby)));
                 }
                 catch (LobbyServiceException e)
