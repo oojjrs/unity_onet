@@ -43,7 +43,7 @@ namespace oojjrs.onet
 
         private async Task RunAsync(CallbackInterface callback, UnityEngine.Object callbackObject)
         {
-            var logger = callbackObject != null ? callback.Logger : Debug.unityLogger;
+            var logger = (callbackObject != null) ? (callback.Logger ?? Debug.unityLogger) : Debug.unityLogger;
             if (callbackObject == null)
             {
                 // 경고 로깅을 이상하게 해야되네 -.-

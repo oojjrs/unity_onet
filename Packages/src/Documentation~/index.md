@@ -41,5 +41,6 @@ MyNet.Packets.Client.Send(request);
 ## 메모
 
 - Unity Multiplayer Services 초기화와 인증 이후에 세션 API를 사용하는 흐름을 전제로 합니다.
+- `MyNetAuthenticator`는 콜백 로거가 `null`이면 Unity 기본 로거를 사용합니다.
 - `Loopback`은 로컬 테스트용이지만, 호출부가 같은 프레임 동기 완료를 기대하지 않도록 구성하는 편이 안전합니다.
 - 패킷 흐름과 세션 관리 API는 함께 쓸 수 있지만, 각각의 책임 경계를 나눠 두는 방향을 유지하고 있습니다.

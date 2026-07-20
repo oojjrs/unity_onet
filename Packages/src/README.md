@@ -41,4 +41,5 @@ MyNet.Packets.Client.Send(request);
 
 - `Loopback`은 로컬 테스트용 transport이며, 호출부가 같은 프레임 동기 완료를 기대하지 않도록 구성하는 편이 안전합니다.
 - 세션 기반 API는 Unity Services 초기화와 인증 이후 사용을 전제로 합니다.
+- `MyNetAuthenticator`는 콜백에서 로거를 제공하지 않아도 Unity 기본 로거로 예외를 기록합니다.
 - 기존 `Start...` 계열 메서드는 하위 호환용으로 남아 있고, 새 코드에서는 `...Async(...)` 계열 사용을 권장합니다.
