@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.7.0
+
+- UGS 인증과 플레이어 이름 조회 책임을 `com.oojjrs.oauth`로 분리하고 `MyNetAuthenticator` 및 `MyNetAuthenticationException`을 제거했습니다.
+- `MyNetAuthenticator` 사용자는 `Authenticator.CallbackInterface`로 이관해야 합니다. `MyNetAuthenticationException`은 `AuthenticationServiceException`, 인증 중 발생한 `MyNetRequestFailedException`은 `AuthenticationRequestFailedException`으로 대체됩니다. 네트워크 API가 전달하는 `MyNetRequestFailedException`은 그대로 유지됩니다.
+- `MyNetAuthenticationException.Notifications`는 `AuthenticationServiceException.Notifications`의 `AuthenticationNotification` 목록으로 대체됩니다.
+- Authentication 패키지 직접 의존성을 제거했습니다.
+- 직접 사용하는 Core와 Multiplayer만 패키지 의존성으로 유지했습니다.
+- 레거시 heartbeat API가 인증 싱글턴 대신 호출자가 제공한 플레이어 ID를 사용하도록 변경했습니다.
+
 ## 1.6.11
 
 - `MyNetAuthenticator`가 콜백 없이도 경고만 남기고 안전하게 종료되도록 정리했습니다.

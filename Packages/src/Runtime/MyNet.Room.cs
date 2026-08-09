@@ -281,12 +281,13 @@ namespace oojjrs.onet
 
             // 샘플들이 다 15초라서 그냥 따라함.
             [Obsolete("Don't use anymore")]
-            public static void StartHeartbeat(float heartbeatIntervalSeconds = 15, float errorIntervalSeconds = 5)
+            public static void StartHeartbeat(string playerId, float heartbeatIntervalSeconds = 15, float errorIntervalSeconds = 5)
             {
                 var go = new GameObject(nameof(InternalRoomHeartbeat), typeof(InternalRoomHeartbeat));
                 var c = go.GetComponent<InternalRoomHeartbeat>();
                 c.ErrorIntervalSeconds = errorIntervalSeconds;
                 c.HeartbeatIntervalSeconds = heartbeatIntervalSeconds;
+                c.PlayerId = playerId;
 
                 _heartbeat = go;
             }
@@ -388,7 +389,6 @@ namespace oojjrs.onet
                     {
                         callbacks?.OnFailed(MyNetCallbacksInterface.FailureEnum.NotFoundRoom);
                     }
-
 
                 }, callbacks);
             }

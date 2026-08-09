@@ -1,5 +1,4 @@
 using System;
-using Unity.Services.Authentication;
 using Unity.Services.Lobbies;
 using UnityEngine;
 
@@ -11,6 +10,7 @@ namespace oojjrs.onet
 
         public float ErrorIntervalSeconds { get; set; }
         public float HeartbeatIntervalSeconds { get; set; }
+        public string PlayerId { get; set; }
 
         public event Action<MyNetException> OnException;
 
@@ -36,7 +36,7 @@ namespace oojjrs.onet
                             var lobby = await LobbyService.Instance.GetLobbyAsync(id);
                             if (this != null)
                             {
-                                if (lobby.HostId == AuthenticationService.Instance.PlayerId)
+                                if (lobby.HostId == PlayerId)
                                 {
                                     await LobbyService.Instance.SendHeartbeatPingAsync(id);
                                     break;

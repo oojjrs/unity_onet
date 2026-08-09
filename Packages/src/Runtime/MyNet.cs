@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Unity.Services.Authentication;
 using Unity.Services.Core;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
@@ -50,11 +49,6 @@ namespace oojjrs.onet
                     _transportObject = new GameObject(nameof(InternalTransportLoopback), typeof(InternalTransportLoopback));
                     break;
             }
-        }
-
-        internal static MyNetAuthenticationException ToException(AuthenticationException e)
-        {
-            return new(e.ErrorCode, e.Message, e, e.Notifications);
         }
 
         internal static MyNetException ToException(LobbyServiceException e)
