@@ -1,5 +1,8 @@
 # OOJJRS' Unity Netcode Helper
 
+> [!WARNING]
+> **Obsolete:** 이 패키지는 더 이상 유지보수되지 않습니다.
+
 `MyNet` request/response 패킷 흐름과 Unity Multiplayer Services 세션 API를 제공하는 Unity 런타임 패키지입니다.
 
 ## 설치
